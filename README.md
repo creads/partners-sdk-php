@@ -1,2 +1,3 @@
 # partners-api-php
-A simple PHP Creads Partners API client.
+
+A simple PHP client for Creads Partners API
