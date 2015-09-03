@@ -33,7 +33,7 @@ class LoginCommand extends Command
             $path = $_SERVER['HOME'];
         } else {
             $output->writeln('CLI failed to locate your home directory. Configuration file will be saved in current directory as `.partners.json`.');
-            $path = getcwd(); 
+            $path = getcwd();
         }
         $path = $path.'/.partners.json';
 
@@ -82,10 +82,13 @@ class LoginCommand extends Command
             throw new \Exception($message);
         }
 
-        if (!($token = json_decode($response->getBody(), true)) || !isset($token['access_token'])) {
+        if (!($data = json_decode($response->getBody(), true))) {
             throw new \Exception('Failed to decode API response', $path);
         }
-        $config['token'] = $token['access_token'];
+
+        $config['access_token'] = $data['access_token'];
+        $config['expires_at'] = isset($data['expires_in'])?(time()+$data['expires_in']):null;
+        $config['refresh_token'] = isset($data['refresh_token'])?$data['refresh_token']:null;
 
         //save the config
         if (false === file_put_contents($path, json_encode($config, JSON_PRETTY_PRINT))) {
