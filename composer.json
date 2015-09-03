@@ -1,0 +1,26 @@
+{
+	"name": "creads/partners-api",
+	"type": "library",
+	"description": "A simple PHP client and CLI for Creads Partners API",
+	"homepage": "http://www.creads-partners.com",
+	"license": "MIT",
+	"authors": [
+        {"name": "Damien Pitard", "email": "damien.pitard@gmail.com"}
+    ],
+    "require": {
+    	"php": ">=5.4.0",
+        "guzzlehttp/guzzle": "^6.0",
+		"symfony/console": "^2.7"
+    },
+    "bin": ["bin/partners"],
+    "autoload": {
+        "psr-4": { "Creads\\Partners\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+	"require-dev": {
+	}
+}
