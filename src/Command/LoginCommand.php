@@ -55,46 +55,14 @@ class LoginCommand extends Command
 
         if (!file_exists($path) || $reset) {
 
-            if (!$clientId = $dialog->ask(
-                $output,
-                sprintf('<question>Client ID</question>%s: ', $reset?(' [<comment>'.$config['client_id'].'</comment>]'):''),
-                false
-            )) {
-                if ($reset) {
-                    $clientId = $config['client_id'];
-                } else {
-                    throw new \InvalidArgumentException('Client ID is required');
-                }
-            }
-            $config['client_id'] = $clientId;
+            $config['base_uri'] = 'https://connect-preprod.creads-partners.com';
 
-            if (!$clientSecret = $dialog->ask(
-                $output,
-                sprintf('<question>Client Secret</question>%s: ', $reset?(' [<comment>'.$config['client_secret'].'</comment>]'):''),
-                false
-            )) {
-                if ($reset) {
-                    $clientSecret = $config['client_secret'];
-                } else {
-                    throw new \InvalidArgumentException('Client Secret is required');
-                }
-            }
-            $config['client_secret'] = $clientSecret;
+            $config['client_id'] = $this->getConfigValue($output, 'Client ID', isset($config['client_id'])?$config['client_id']:null, $reset);
+
+            $config['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($config['client_secret'])?$config['client_secret']:null, $reset);
 
             if (!$noPassword) {
-                if (!$username = $dialog->ask(
-                    $output,
-                    sprintf('<question>Username</question>%s: ', ($reset && isset($config['username']))?(' [<comment>'.$config['username'].'</comment>]'):''),
-                    false
-                )) {
-                    if ($reset && isset($config['username'])) {
-                        $username = $config['username'];
-                    } else {
-                        throw new \InvalidArgumentException('Username is required');
-                    }
-                }
-                $config['username'] = $username;
-
+                $config['username'] = $this->getConfigValue($output, 'Username', isset($config['username'])?$config['username']:null, $reset);
                 $config['grant_type'] = 'password';
             }
         }
@@ -104,6 +72,7 @@ class LoginCommand extends Command
             $config['grant_type'] = 'client_credentials';
         }
 
+        //build form params
         $params = [
             'grant_type' => $config['grant_type'],
             'scope' => 'base'
@@ -125,8 +94,7 @@ class LoginCommand extends Command
             ]);
         }
 
-        $baseUri = 'https://connect-preprod.creads-partners.com';
-        $client = new \GuzzleHttp\Client(['base_uri' => $baseUri]);
+        $client = new \GuzzleHttp\Client(['base_uri' => $config['base_uri']]);
         try {
             $response = $client->post('/oauth2/token', [
                 'auth' => [$config['client_id'], $config['client_secret']],
@@ -152,5 +120,30 @@ class LoginCommand extends Command
         }
 
         $output->writeln('OK');
+    }
+
+    /**
+     *
+     * @param OutputInterface   $output
+     * @param string            $label
+     * @param string|null       $previous
+     * @param bool              $reset
+     */
+    protected function getConfigValue($output, $label, $previous, $reset)
+    {
+        $dialog = $this->getHelperSet()->get('dialog');
+        if (!$value = $dialog->ask(
+            $output,
+            sprintf('<question>%s</question>%s: ', $label, $previous?(' [<comment>'.$previous.'</comment>]'):''),
+            false
+        )) {
+            if ($reset) {
+                $value = $previous;
+            } else {
+                throw new \InvalidArgumentException(sprintf('%s is required', $label));
+            }
+        }
+
+        return $value;
     }
 }
