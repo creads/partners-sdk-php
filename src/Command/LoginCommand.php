@@ -7,9 +7,21 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Creads\Partners\Configuration;
 
 class LoginCommand extends Command
 {
+    protected $configuration;
+
+    public function __construct(Configuration $configuration)
+    {
+        parent::__construct();
+        $this->configuration = $configuration;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         $this
@@ -30,55 +42,43 @@ class LoginCommand extends Command
         ;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $dialog = $this->getHelperSet()->get('dialog');
         $reset = $input->getOption('reset', false);
         $noPassword = $input->getOption('no-password', false);
 
-        //build the configuration file path
-        if (isset($_SERVER['HOME'])) {
-            $path = $_SERVER['HOME'];
-        } else {
-            $output->writeln('CLI failed to locate your home directory. Configuration file will be saved in current directory as `.partners.json`.');
-            $path = getcwd();
-        }
-        $path = $path.'/.partners.json';
+        $this->configuration->load();
 
-        if (file_exists($path)) {
-            //load the configuration
-            $config = json_decode(file_get_contents($path), true);
-            if (!$config) {
-                throw new \Exception(sprintf('Failed to load configuration file. Please run the command again with "--reset" option. If the problem persists, remove manually the file "%s".', $path));
-            }
-        }
+        if (!$this->configuration->exists() || $reset) {
 
-        if (!file_exists($path) || $reset) {
+            $this->configuration['base_uri'] = 'https://connect-preprod.creads-partners.com';
 
-            $config['base_uri'] = 'https://connect-preprod.creads-partners.com';
+            $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
 
-            $config['client_id'] = $this->getConfigValue($output, 'Client ID', isset($config['client_id'])?$config['client_id']:null, $reset);
-
-            $config['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($config['client_secret'])?$config['client_secret']:null, $reset);
+            $this->configuration['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($this->configuration['client_secret'])?$this->configuration['client_secret']:null, $reset);
 
             if (!$noPassword) {
-                $config['username'] = $this->getConfigValue($output, 'Username', isset($config['username'])?$config['username']:null, $reset);
-                $config['grant_type'] = 'password';
+                $this->configuration['username'] = $this->getConfigValue($output, 'Username', isset($this->configuration['username'])?$this->configuration['username']:null, $reset);
+                $this->configuration['grant_type'] = 'password';
             }
         }
 
         //even if we are not reseting credentials, we can switch to "no password" mode
         if ($noPassword) {
-            $config['grant_type'] = 'client_credentials';
+            $this->configuration['grant_type'] = 'client_credentials';
         }
 
         //build form params
         $params = [
-            'grant_type' => $config['grant_type'],
+            'grant_type' => $this->configuration['grant_type'],
             'scope' => 'base'
         ];
 
-        if ('password' === $config['grant_type']) {
+        if ('password' === $this->configuration['grant_type']) {
 
             if (!$password = $dialog->askHiddenResponse(
                 $output,
@@ -89,15 +89,15 @@ class LoginCommand extends Command
             }
 
             $params = array_merge($params,[
-                'username' => $config['username'],
+                'username' => $this->configuration['username'],
                 'password' => $password,
             ]);
         }
 
-        $client = new \GuzzleHttp\Client(['base_uri' => $config['base_uri']]);
+        $client = new \GuzzleHttp\Client(['base_uri' => $this->configuration['base_uri']]);
         try {
             $response = $client->post('/oauth2/token', [
-                'auth' => [$config['client_id'], $config['client_secret']],
+                'auth' => [$this->configuration['client_id'], $this->configuration['client_secret']],
                 'form_params' => $params
             ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
@@ -110,14 +110,11 @@ class LoginCommand extends Command
             throw new \Exception('Failed to decode API response', $path);
         }
 
-        $config['access_token'] = $data['access_token'];
-        $config['expires_at'] = isset($data['expires_in'])?(time()+$data['expires_in']):null;
-        $config['refresh_token'] = isset($data['refresh_token'])?$data['refresh_token']:null;
+        $this->configuration['access_token'] = $data['access_token'];
+        $this->configuration['expires_at'] = isset($data['expires_in'])?(time()+$data['expires_in']):null;
+        $this->configuration['refresh_token'] = isset($data['refresh_token'])?$data['refresh_token']:null;
 
-        //save the config
-        if (false === file_put_contents($path, json_encode($config, JSON_PRETTY_PRINT))) {
-            throw new \Exception(sprintf('Failed to store configuration file "%s". Can not continue.', $path));
-        }
+        $this->configuration->store();
 
         $output->writeln('OK');
     }
