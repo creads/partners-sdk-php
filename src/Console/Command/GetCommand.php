@@ -58,14 +58,25 @@ class GetCommand extends Command
             'access_token' => $this->configuration['access_token'],
             'base_uri' => $this->configuration['api_base_uri']
         ]);
-        try {
-            $response = $client->get($uri);
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            var_dump($e->getRequest());
-            throw $e;
-        }
-        $output->writeln((string)$response->getBody());
 
-        $output->writeln('OK');
+        $response = $client->get($uri);
+        // try {
+        //     $response = $client->get($uri);
+        // } catch (\GuzzleHttp\Exception\ClientException $e) {
+        //     var_dump($e->getRequest());
+        //     throw $e;
+        // }
+        //
+
+        // if (!$input->isInteractive()) {
+        //     $data = (string)$response->getBody();
+        // } else {
+            // $data = json_encode(json_decode((string)$response->getBody()), JSON_PRETTY_PRINT);
+        // }
+        //
+
+        $json = $this->getHelperSet()->get('json');
+
+        $output->writeln($json->format((string)$response->getBody()));
     }
 }
