@@ -10,4 +10,5 @@ use Creads\Partners\Configuration;
 $configuration = new Configuration();
 $application = new Application('Creads Partners API CLI', '1.0.0');
 $application->add(new Command\LoginCommand($configuration));
+$application->add(new Command\GetCommand($configuration));
 $application->run();

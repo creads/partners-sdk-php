@@ -55,6 +55,8 @@ class LoginCommand extends Command
 
         if (!$this->configuration->exists() || $reset) {
 
+            $output->writeln("Please provide your OAuth2 credentials (won't be asked next time).");
+
             $this->configuration['base_uri'] = 'https://connect-preprod.creads-partners.com';
 
             $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
@@ -79,7 +81,8 @@ class LoginCommand extends Command
         ];
 
         if ('password' === $this->configuration['grant_type']) {
-
+            $output->writeln("> You are in using \"password\" grant type. If you've got \"client_credentials\" right onto the API");
+            $output->writeln(sprintf("> and don't want to type your password in anymore, please run command <info>%s login --no-password</info>.", $_SERVER['argv'][0]));
             if (!$password = $dialog->askHiddenResponse(
                 $output,
                 '<question>Password</question>: ',
@@ -88,12 +91,13 @@ class LoginCommand extends Command
                 return 1;
             }
 
-            $params = array_merge($params,[
+            $params = array_merge($params, [
                 'username' => $this->configuration['username'],
                 'password' => $password,
             ]);
         }
 
+        //@todo build a service to do that
         $client = new \GuzzleHttp\Client(['base_uri' => $this->configuration['base_uri']]);
         try {
             $response = $client->post('/oauth2/token', [
@@ -116,7 +120,7 @@ class LoginCommand extends Command
 
         $this->configuration->store();
 
-        $output->writeln('OK');
+        $output->writeln('Login: <comment>OK</comment>');
     }
 
     /**
