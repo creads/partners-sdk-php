@@ -1,6 +1,6 @@
 <?php
 
-namespace Creads\Partners;
+namespace Creads\Partners\Console;
 
 class Configuration implements \ArrayAccess
 {

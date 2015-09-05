@@ -1,6 +1,6 @@
 <?php
 
-namespace Creads\Partners\Command;
+namespace Creads\Partners\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,7 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Configuration;
+use Creads\Partners\Console\Configuration;
+use Creads\Partners\Client;
 
 class GetCommand extends Command
 {
@@ -36,9 +37,11 @@ class GetCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->configuration->load();
+        $uri = ltrim($input->getArgument('URI'), '/');
 
         //@todo create a command helper, will be used on several commands
-        // if (!$this->configuration->exists()) {
+        //run login if configuration does not exists of if the access token is expired
+        if (!isset($this->configuration['expires_at']) || time() > $this->configuration['expires_at']) {
             $command = $this->getApplication()->find('login');
             $arguments = array(
                 'command' => 'login'
@@ -48,7 +51,20 @@ class GetCommand extends Command
             if ($returnCode != 0) {
                 return $returnCode;
             }
-        // }
+        }
+
+        //@todo create a service
+        $client = new Client([
+            'access_token' => $this->configuration['access_token'],
+            'base_uri' => $this->configuration['api_base_uri']
+        ]);
+        try {
+            $response = $client->get($uri);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            var_dump($e->getRequest());
+            throw $e;
+        }
+        $output->writeln((string)$response->getBody());
 
         $output->writeln('OK');
     }

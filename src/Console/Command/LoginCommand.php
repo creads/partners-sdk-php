@@ -1,16 +1,22 @@
 <?php
 
-namespace Creads\Partners\Command;
+namespace Creads\Partners\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Configuration;
+use Creads\Partners\Console\Configuration;
 
 class LoginCommand extends Command
 {
+    const CONNECT_BASE_URI = 'https://connect-preprod.creads-partners.com';
+    const API_BASE_URI = 'https://api-preprod.creads-partners.com/v1';
+
+    /**
+     * @var Creads\Partners\Console\Configuration
+     */
     protected $configuration;
 
     public function __construct(Configuration $configuration)
@@ -57,7 +63,8 @@ class LoginCommand extends Command
 
             $output->writeln("Please provide your OAuth2 credentials (won't be asked next time).");
 
-            $this->configuration['base_uri'] = 'https://connect-preprod.creads-partners.com';
+            $this->configuration['connect_base_uri'] = self::CONNECT_BASE_URI;
+            $this->configuration['api_base_uri'] = self::API_BASE_URI;
 
             $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
 
@@ -81,8 +88,8 @@ class LoginCommand extends Command
         ];
 
         if ('password' === $this->configuration['grant_type']) {
-            $output->writeln("> You are in using \"password\" grant type. If you've got \"client_credentials\" right onto the API");
-            $output->writeln(sprintf("> and don't want to type your password in anymore, please run command <info>%s login --no-password</info>.", $_SERVER['argv'][0]));
+            $output->writeln("> You are in using \"password\" grant type. If you are allowed to use \"client_credentials\" OAuth2 grant type");
+            $output->writeln(sprintf("> and don't want to type your password anymore, please run command <info>%s login --no-password</info> anytime.", $_SERVER['argv'][0]));
             if (!$password = $dialog->askHiddenResponse(
                 $output,
                 '<question>Password</question>: ',
@@ -98,7 +105,7 @@ class LoginCommand extends Command
         }
 
         //@todo build a service to do that
-        $client = new \GuzzleHttp\Client(['base_uri' => $this->configuration['base_uri']]);
+        $client = new \GuzzleHttp\Client(['base_uri' => $this->configuration['connect_base_uri']]);
         try {
             $response = $client->post('/oauth2/token', [
                 'auth' => [$this->configuration['client_id'], $this->configuration['client_secret']],
@@ -111,7 +118,7 @@ class LoginCommand extends Command
         }
 
         if (!($data = json_decode($response->getBody(), true))) {
-            throw new \Exception('Failed to decode API response', $path);
+            throw new \Exception('Failed to decode API response');
         }
 
         $this->configuration['access_token'] = $data['access_token'];

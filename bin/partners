@@ -4,11 +4,10 @@
 require __DIR__ .'/../vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
-use Creads\Partners\Command;
-use Creads\Partners\Configuration;
+use Creads\Partners\Console;
 
-$configuration = new Configuration();
+$configuration = new Console\Configuration();
 $application = new Application('Creads Partners API CLI', '1.0.0');
-$application->add(new Command\LoginCommand($configuration));
-$application->add(new Command\GetCommand($configuration));
+$application->add(new Console\Command\LoginCommand($configuration));
+$application->add(new Console\Command\GetCommand($configuration));
 $application->run();
