@@ -88,8 +88,8 @@ class LoginCommand extends Command
         ];
 
         if ('password' === $this->configuration['grant_type']) {
-            $output->writeln("> You are in using \"password\" grant type. If you are allowed to use \"client_credentials\" OAuth2 grant type");
-            $output->writeln(sprintf("> and don't want to type your password anymore, please run command <info>%s login --no-password</info> anytime.", $_SERVER['argv'][0]));
+            $output->writeln("> You are using \"password\" grant type. If you are allowed to use \"client_credentials\" OAuth2 grant type");
+            $output->writeln(sprintf("> and don't want to type your password each time, please run command <info>%s login --no-password</info> anytime.", $_SERVER['argv'][0]));
             if (!$password = $dialog->askHiddenResponse(
                 $output,
                 '<question>Password</question>: ',

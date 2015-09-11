@@ -17,7 +17,7 @@ class JsonHelper extends Helper
      */
     public function format($json, $color = true)
     {
-        if (!is_array($json) {
+        if (!is_array($json)) {
             $json = json_decode($json, true);
         }
         $result = json_encode($json, JSON_PRETTY_PRINT);

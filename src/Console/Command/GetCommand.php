@@ -59,21 +59,13 @@ class GetCommand extends Command
             'base_uri' => $this->configuration['api_base_uri']
         ]);
 
-        $response = $client->get($uri);
-        // try {
-        //     $response = $client->get($uri);
-        // } catch (\GuzzleHttp\Exception\ClientException $e) {
-        //     var_dump($e->getRequest());
-        //     throw $e;
-        // }
-        //
+        try {
+            $response = $client->get($uri);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $output->writeln('<error>'.$e->getResponse()->getStatusCode() . ' '.$e->getResponse()->getReasonPhrase().'</error>');
 
-        // if (!$input->isInteractive()) {
-        //     $data = (string)$response->getBody();
-        // } else {
-            // $data = json_encode(json_decode((string)$response->getBody()), JSON_PRETTY_PRINT);
-        // }
-        //
+            return $e->getCode();
+        }
 
         $json = $this->getHelperSet()->get('json');
 
