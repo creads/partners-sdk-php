@@ -94,12 +94,13 @@ class GetCommand extends Command
 
         $error = ($response->getStatusCode() >= 400);
 
-        if ($include || $error) {
+        if ($include) {
             $reason = $response->getStatusCode().' '.$response->getReasonPhrase();
-            if ($error) {
-                $reason = '<error>'.$reason.'</error>';
-            }
             $output->writeln($reason);
+        } else if ($error) {
+            $reason = '<error>'.$response->getStatusCode().' '.$response->getReasonPhrase().'</error>';
+            //for the output to stdderr to no break the output
+            $output->getErrorOutput()->writeln($reason);
         }
 
         if ($include) {
@@ -114,7 +115,7 @@ class GetCommand extends Command
 
         $body = json_decode($body, true);
         if (false === $body) {
-            $output->writeln('<error>Malformed JSON body</error>');
+            $output->getErrorOutput()->writeln('<error>Malformed JSON body</error>');
         } else {
             if ($filter && !$error) {
                 $body = $json->format((new JSONPath($body))->find($filter));
