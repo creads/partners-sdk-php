@@ -2,13 +2,12 @@
 
 namespace Creads\Partners\Console\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Console\Configuration;
+use Creads\Partners\Console\Command\Command;
 use Creads\Partners\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
@@ -16,14 +15,6 @@ use Flow\JSONPath\JSONPath;
 
 class GetCommand extends Command
 {
-    protected $configuration;
-
-    public function __construct(Configuration $configuration)
-    {
-        parent::__construct();
-        $this->configuration = $configuration;
-    }
-
     protected function configure()
     {
         $this
@@ -52,17 +43,19 @@ class GetCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $json = $this->getHelperSet()->get('json');
-        $this->configuration->load();
+
         $uri = ltrim($input->getArgument('URI'), '/');
         $include = $input->getOption('include', false);
         $filter = $input->getOption('filter', false);
 
         //@todo create a command helper, will be used on several commands
-        //run login if configuration does not exists of if the access token is expired
         if (!$this->configuration->exists()
             || !isset($this->configuration['access_token'])
             || (isset($this->configuration['expires_at']) && time() > $this->configuration['expires_at'])
         ) {
+            //run login if configuration does not exists
+            //if the access token does not exist
+            //or if the access token is expired
             $command = $this->getApplication()->find('login');
             $arguments = array(
                 'command' => 'login'

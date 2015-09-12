@@ -19,7 +19,7 @@ Run the Composer command to install the latest stable version:
 composer.phar require creads/partners-api
 ```
 
-## Using the library
+## Use the library
 
 After installing, you need to require Composer's autoloader:
 
@@ -27,13 +27,9 @@ After installing, you need to require Composer's autoloader:
 require 'vendor/autoload.php';
 ```
 
-### Get an OAuth2 token
-
 First you need to get a fresh OAuth2 access token:
 
 ...
-
-###  How to
 
 Instance a new client with the token:
 
@@ -96,7 +92,7 @@ try {
     $response = $client->get('/unknown-url');
     //...
 } catch (ClientException $e) {
-    if (401 == $e->getResponse()->getStatusCode()) {
+    if (404 == $e->getResponse()->getStatusCode()) {
         //do something
     }
 }
@@ -112,10 +108,12 @@ $client = new Client([
     'http_errors' => false
 ]);
 $response = $client->get('/unknown-url');
-//...
+if (404 == $e->getResponse()->getStatusCode()) {
+    //do something
+}
 ```
 
-## Using the CLI application
+## Use the CLI application
 
 Get some help:
 
@@ -125,8 +123,64 @@ Log onto the API (needed the first time):
 
     bin/partners login
 
-If you've got `client_credentials` grant type allowed for you'r OAuth client and don't want to type the password each time:
+Avoid to type your password each time token expires, using "client_credentials" grant type:
 
     bin/partners login --grant-type=client_credentials
 
-bin/partners -i get '/users?query=["created_at", ">=", "2015-09-11T00:00:00Z"]'
+Or if you are not allowed to authenticated with "client_credentials", save your password locally:
+
+    bin/partners login --save-password
+
+Get a resource:
+
+    bin/partners get /
+
+```json
+{
+    "name": "Creads Partners API",
+    "version": "1.0.0-alpha12"
+}
+```
+
+Including HTTP-headers in the output with `-i`:
+
+    bin/partners get -i /
+
+```sh
+200 OK
+Cache-Control: no-cache
+Content-Type: application/json
+Date: Sat, 12 Sep 2015 17:31:58 GMT
+Server: nginx/1.6.2
+Content-Length: 72
+Connection: keep-alive
+{
+    "name": "Creads Partners API",
+    "version": "1.0.0"
+}
+```
+
+Filtering result thanks to JSON Path (see http://goessner.net/articles/JsonPath).
+For instance, get only the version number of the API:
+
+    bin/partners get / -f '$.version'
+
+Or get the organization I am member of:
+
+    bin/partners get /me -f '$.member_of.*.organization'
+
+Create a resource:
+
+...
+
+Update a resource:
+
+...
+
+Update a resource using an editor:
+
+    bin/partners get /me | vim - | bin/partners post /me
+
+Update a resource using *Sublime Text*:
+
+    bin/partners get /me | subl - | bin/partners post /me

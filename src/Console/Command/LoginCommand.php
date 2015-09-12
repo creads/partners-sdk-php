@@ -2,27 +2,15 @@
 
 namespace Creads\Partners\Console\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Console\Configuration;
+use Creads\Partners\Console\Command\Command;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class LoginCommand extends Command
 {
-    /**
-     * @var Creads\Partners\Console\Configuration
-     */
-    protected $configuration;
-
-    public function __construct(Configuration $configuration)
-    {
-        parent::__construct();
-        $this->configuration = $configuration;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -65,11 +53,10 @@ class LoginCommand extends Command
 
         $dialog = $this->getHelperSet()->get('dialog');
         $formatter = $this->getHelperSet()->get('formatter');
+
         $reset = $input->getOption('reset', false);
         $type = $input->getOption('grant-type', null);
         $savePassword = $input->getOption('save-password', false);
-
-        $this->configuration->load();
 
         if (!$this->configuration->exists()) {
             $this->configuration['grant_type'] = 'password';
@@ -93,7 +80,7 @@ class LoginCommand extends Command
             //and password was not saved
             //and user did not ask to save it
             $output->writeln($formatter->formatBlock([
-                'Avoid to type your password each time, using "client_credentials" grant type:',
+                'Avoid to type your password each time token expires, using "client_credentials" grant type:',
                 '',
                 sprintf('    %s login --grant-type=client_credentials', $_SERVER['argv'][0]),
                 '',
