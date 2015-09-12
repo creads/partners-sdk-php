@@ -73,7 +73,7 @@ class LoginCommand extends Command
         } else if ($type && $this->configuration['grant_type'] !== $type) {
             //if grant type was forced to change
             $this->configuration['grant_type'] = $type;
-var_dump($type);
+
             //clear password for security concerns
             unset($this->configuration['password']);
         }
