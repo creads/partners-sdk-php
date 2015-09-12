@@ -32,7 +32,7 @@ require 'vendor/autoload.php';
 First you need to get a fresh OAuth2 access token:
 
 ...
- 
+
 ###  How to
 
 Instance a new client with the token:
@@ -40,22 +40,24 @@ Instance a new client with the token:
 ```php
 use Creads\Partners\Client;
 
-$client = new Client($token);
+$client = new Client([
+    'access_token' => $token
+]);
 ```
 
 Get information about the API:
 
 ```php
-$root = $client->get('/');
-echo $root['version'];
+$response = $client->get('/');
+echo json_decode($response->getBody(), true)['version'];
 //1.0.0
 ```
 
 Get information about me:
 
 ```php
-$me = $client->get('/me');
-echo $me['firstname'];
+$response = $client->get('/me');
+echo json_decode($response->getBody(), true)['firstname'];
 //John
 ```
 
@@ -82,39 +84,35 @@ $client->post('/projects', [
 
 ### Errors and exceptions handling
 
-When HTTP errors occurs, the library throws an `\Creads\Partners\HttpException` object:
+When HTTP errors occurs (4xx and 5xx responses) , the library throws a `GuzzleHttp\Exception\ClientException` object:
 
 ```php
-use Creads\Partners\HttpException;
+use GuzzleHttp\Exception\ClientException;
 
 try {
-	$me = $client->get('/me');
-	echo $me['firstname'];
-} catch (HttpException) {
-    if (401 == $response->getStatusCode()) {
+    $client = new Client([
+        'access_token' => $token
+    ]);
+    $response = $client->get('/unknown-url');
+    //...
+} catch (ClientException $e) {
+    if (401 == $e->getResponse()->getStatusCode()) {
         //do something
     }
 }
 ```
 
-If you prefer the client to do something on any http errors:
+``
+
+If you prefer to disable throwing exceptions on an HTTP protocol error:
 
 ```php
-$client->error(function(Response $response) {
-    if (401 == $response->getStatusCode()) {
-        //do something
-    }
-});
-```
-
-> Other non HTTP exceptions will continue to be thrown except if you want to globally catch them with:
-
-```php
-use Creads\Partners\RuntimeException;
-
-$client->exception(function(RuntimeException $exception) {
-	if ($exception instance)
-});
+$client = new Client([
+    'access_token' => $token,
+    'http_errors' => false
+]);
+$response = $client->get('/unknown-url');
+//...
 ```
 
 ## Using the CLI application

@@ -40,7 +40,7 @@ class LoginCommand extends Command
                'Reset credentials'
             )
             ->addOption(
-                '--no-password',
+                'no-password',
                 null,
                 InputOption::VALUE_NONE,
                 'User credentials needed'

@@ -13,7 +13,15 @@ class Client extends GuzzleClient
     public function __construct(array $config = [])
     {
         $config = array_merge($this->getDefaultClientConfig(), $config);
+
+        if (!empty($config['access_token'])) {
+            $config['headers'] = [
+                'Authorization' => 'Bearer ' . $config['access_token']
+            ];
+        }
         parent::__construct($config);
+
+
     }
 
     /**
@@ -27,24 +35,16 @@ class Client extends GuzzleClient
         ];
     }
 
-    /**
-     * Returns options to apply every request
-     * @return array
-     */
-    protected function getRequestOptions()
-    {
-        return [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->getConfig('access_token')
-            ]
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function get($uri, array $options = [])
-    {
-        return parent::get($uri, array_merge_recursive($this->getRequestOptions(), $options));
-    }
+    // /**
+    //  * Returns options to apply every request
+    //  * @return array
+    //  */
+    // protected function getRequestOptions()
+    // {
+    //     return [
+    //         'headers' => [
+    //             'Authorization' => 'Bearer ' . $this->getConfig('access_token')
+    //         ]
+    //     ];
+    // }
 }

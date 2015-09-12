@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Console\Configuration;
 use Creads\Partners\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Request;
 
 class GetCommand extends Command
 {
@@ -31,13 +33,21 @@ class GetCommand extends Command
               InputArgument::REQUIRED,
               'URI of the resource'
             )
+            ->addOption(
+                'include',
+                'i',
+                InputOption::VALUE_NONE,
+                'Include the HTTP-header in the output'
+            )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $json = $this->getHelperSet()->get('json');
         $this->configuration->load();
         $uri = ltrim($input->getArgument('URI'), '/');
+        $include = $input->getOption('include', false);
 
         //@todo create a command helper, will be used on several commands
         //run login if configuration does not exists of if the access token is expired
@@ -56,19 +66,37 @@ class GetCommand extends Command
         //@todo create a service
         $client = new Client([
             'access_token' => $this->configuration['access_token'],
-            'base_uri' => $this->configuration['api_base_uri']
+            'base_uri' => $this->configuration['api_base_uri'],
+            'http_errors' => false
         ]);
 
-        try {
-            $response = $client->get($uri);
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $output->writeln('<error>'.$e->getResponse()->getStatusCode() . ' '.$e->getResponse()->getReasonPhrase().'</error>');
+        $request = new Request('GET', $uri);
+        $response = $client->send($request);
 
-            return $e->getCode();
+        //@todo use handler
+        // if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+        //     foreach($request->getHeaders() as $name => $value) {
+        //         $output->writeln($name.': '.$value[0]);
+        //     }
+        // }
+
+        if ($include || $response->getStatusCode() >= 400) {
+            $reason = $response->getStatusCode().' '.$response->getReasonPhrase();
+            if ($response->getStatusCode() >= 400) {
+                $reason = '<error>'.$reason.'</error>';
+            }
+            $output->writeln($reason);
         }
 
-        $json = $this->getHelperSet()->get('json');
+        if ($include) {
+            foreach($response->getHeaders() as $name => $value) {
+                $output->writeln($name.': '.$value[0]);
+            }
+            // $output->writeln('');
+        }
 
         $output->writeln($json->format((string)$response->getBody()));
+
+        return ($response->getStatusCode() >= 400)?$response->getStatusCode():0;
     }
 }
