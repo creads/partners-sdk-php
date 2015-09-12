@@ -12,9 +12,6 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class LoginCommand extends Command
 {
-    const CONNECT_BASE_URI = 'https://connect-preprod.creads-partners.com/';
-    const API_BASE_URI = 'https://api-preprod.creads-partners.com/v1/';
-
     /**
      * @var Creads\Partners\Console\Configuration
      */
@@ -50,8 +47,7 @@ class LoginCommand extends Command
                 'grant-type',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Use a given OAuth2 grant type',
-                'password'
+                'Use a given OAuth2 grant type (default: password)'
             )
         ;
     }
@@ -77,7 +73,7 @@ class LoginCommand extends Command
         } else if ($type && $this->configuration['grant_type'] !== $type) {
             //if grant type was forced to change
             $this->configuration['grant_type'] = $type;
-
+var_dump($type);
             //clear password for security concerns
             unset($this->configuration['password']);
         }
@@ -109,10 +105,6 @@ class LoginCommand extends Command
             $output->writeln("Please provide your credentials (won't be asked next time).");
 
             unset($this->configuration['password']);
-
-            $this->configuration['connect_base_uri'] = self::CONNECT_BASE_URI;
-
-            $this->configuration['api_base_uri'] = self::API_BASE_URI;
 
             $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
 

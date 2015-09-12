@@ -5,7 +5,8 @@ namespace Creads\Partners\Console;
 class Configuration implements \ArrayAccess
 {
     protected $path;
-    protected $parameters;
+
+    protected $parameters = [];
 
     public function __construct()
     {
@@ -16,7 +17,20 @@ class Configuration implements \ArrayAccess
             $output->writeln('CLI failed to locate your home directory. Configuration file will be saved in current directory as `.partners.json`.');
             $this->path = getcwd();
         }
+
         $this->path = $this->path.'/.partners.json';
+
+        if (!$this->exists()) {
+            $this->parameters = $this->getDefaultParameters();
+        }
+    }
+
+    public function getDefaultParameters()
+    {
+        return [
+            'connect_base_uri' => 'https://connect-preprod.creads-partners.com/',
+            'api_base_uri' => 'https://api-preprod.creads-partners.com/v1/',
+        ];
     }
 
     /**
