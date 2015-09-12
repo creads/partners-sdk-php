@@ -57,6 +57,8 @@ class LoginCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $output = $output->getErrorOutput();
+
         $style = new OutputFormatterStyle('black', 'white');
         $output->getFormatter()->setStyle('fire', $style);
 
