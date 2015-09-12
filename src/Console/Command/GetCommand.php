@@ -12,6 +12,7 @@ use Creads\Partners\Console\Configuration;
 use Creads\Partners\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
+use Flow\JSONPath\JSONPath;
 
 class GetCommand extends Command
 {
@@ -34,6 +35,12 @@ class GetCommand extends Command
               'URI of the resource'
             )
             ->addOption(
+              'filter',
+              'f',
+              InputOption::VALUE_REQUIRED,
+              'Filter results using JSON path (http://goessner.net/articles/JsonPath)'
+            )
+            ->addOption(
                 'include',
                 'i',
                 InputOption::VALUE_NONE,
@@ -48,10 +55,14 @@ class GetCommand extends Command
         $this->configuration->load();
         $uri = ltrim($input->getArgument('URI'), '/');
         $include = $input->getOption('include', false);
+        $filter = $input->getOption('filter', false);
 
         //@todo create a command helper, will be used on several commands
         //run login if configuration does not exists of if the access token is expired
-        if (!isset($this->configuration['expires_at']) || time() > $this->configuration['expires_at']) {
+        if (!$this->configuration->exists()
+            || !isset($this->configuration['access_token'])
+            || (isset($this->configuration['expires_at']) && time() > $this->configuration['expires_at'])
+        ) {
             $command = $this->getApplication()->find('login');
             $arguments = array(
                 'command' => 'login'
@@ -79,10 +90,13 @@ class GetCommand extends Command
         //         $output->writeln($name.': '.$value[0]);
         //     }
         // }
+        //
 
-        if ($include || $response->getStatusCode() >= 400) {
+        $error = ($response->getStatusCode() >= 400);
+
+        if ($include || $error) {
             $reason = $response->getStatusCode().' '.$response->getReasonPhrase();
-            if ($response->getStatusCode() >= 400) {
+            if ($error) {
                 $reason = '<error>'.$reason.'</error>';
             }
             $output->writeln($reason);
@@ -92,11 +106,25 @@ class GetCommand extends Command
             foreach($response->getHeaders() as $name => $value) {
                 $output->writeln($name.': '.$value[0]);
             }
-            // $output->writeln('');
         }
 
-        $output->writeln($json->format((string)$response->getBody()));
+        $body = (string)$response->getBody();
 
-        return ($response->getStatusCode() >= 400)?$response->getStatusCode():0;
+        //@toto test content-type
+
+        $body = json_decode($body, true);
+        if (false === $body) {
+            $output->writeln('<error>Malformed JSON body</error>');
+        } else {
+            if ($filter && !$error) {
+                $body = $json->format((new JSONPath($body))->find($filter));
+            } else {
+                $body = $json->format($body);
+            }
+        }
+
+        $output->writeln($body);
+
+        return ($error)?$response->getStatusCode():0;
     }
 }

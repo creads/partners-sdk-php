@@ -81,6 +81,6 @@ class Configuration implements \ArrayAccess
 
     public function offsetUnset($name)
     {
-        unset($this->paramaters[$name]);
+        unset($this->parameters[$name]);
     }
 }

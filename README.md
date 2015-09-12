@@ -116,3 +116,17 @@ $response = $client->get('/unknown-url');
 ```
 
 ## Using the CLI application
+
+Get some help:
+
+    bin/partners --help
+
+Log onto the API (needed the first time):
+
+    bin/partners login
+
+If you've got `client_credentials` grant type allowed for you'r OAuth client and don't want to type the password each time:
+
+    bin/partners login --grant-type=client_credentials
+
+bin/partners -i get '/users?query=["created_at", ">=", "2015-09-11T00:00:00Z"]'

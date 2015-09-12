@@ -8,11 +8,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Console\Configuration;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class LoginCommand extends Command
 {
-    const CONNECT_BASE_URI = 'https://connect-preprod.creads-partners.com';
-    const API_BASE_URI = 'https://api-preprod.creads-partners.com/v1';
+    const CONNECT_BASE_URI = 'https://connect-preprod.creads-partners.com/';
+    const API_BASE_URI = 'https://api-preprod.creads-partners.com/v1/';
 
     /**
      * @var Creads\Partners\Console\Configuration
@@ -40,10 +41,17 @@ class LoginCommand extends Command
                'Reset credentials'
             )
             ->addOption(
-                'no-password',
+                'save-password',
                 null,
                 InputOption::VALUE_NONE,
-                'User credentials needed'
+                'Save your password locally'
+            )
+            ->addOption(
+                'grant-type',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Use a given OAuth2 grant type',
+                'password'
             )
         ;
     }
@@ -53,32 +61,66 @@ class LoginCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $style = new OutputFormatterStyle('black', 'white');
+        $output->getFormatter()->setStyle('fire', $style);
+
         $dialog = $this->getHelperSet()->get('dialog');
+        $formatter = $this->getHelperSet()->get('formatter');
         $reset = $input->getOption('reset', false);
-        $noPassword = $input->getOption('no-password', false);
+        $type = $input->getOption('grant-type', null);
+        $savePassword = $input->getOption('save-password', false);
 
         $this->configuration->load();
 
+        if (!$this->configuration->exists()) {
+            $this->configuration['grant_type'] = 'password';
+        } else if ($type && $this->configuration['grant_type'] !== $type) {
+            //if grant type was forced to change
+            $this->configuration['grant_type'] = $type;
+
+            //clear password for security concerns
+            unset($this->configuration['password']);
+        }
+
+        if (!in_array($this->configuration['grant_type'], ['client_credentials', 'password'])) {
+            throw new \InvalidArgumentException(sprintf('Unsupported grant type "%s"', $this->configuration['grant_type']));
+        }
+
+        if ('password' === $this->configuration['grant_type']
+            && !isset($this->configuration['password'])
+            && !$savePassword
+        ) {
+            //if we are using password grant type
+            //and password was not saved
+            //and user did not ask to save it
+            $output->writeln($formatter->formatBlock([
+                'Avoid to type your password each time, using "client_credentials" grant type:',
+                '',
+                sprintf('    %s login --grant-type=client_credentials', $_SERVER['argv'][0]),
+                '',
+                'Or save your password locally (not recommended):',
+                '',
+                sprintf('    %s login --save-password', $_SERVER['argv'][0]),
+            ], 'fire', true));
+        }
+
         if (!$this->configuration->exists() || $reset) {
 
-            $output->writeln("Please provide your OAuth2 credentials (won't be asked next time).");
+            $output->writeln("Please provide your credentials (won't be asked next time).");
+
+            unset($this->configuration['password']);
 
             $this->configuration['connect_base_uri'] = self::CONNECT_BASE_URI;
+
             $this->configuration['api_base_uri'] = self::API_BASE_URI;
 
             $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
 
             $this->configuration['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($this->configuration['client_secret'])?$this->configuration['client_secret']:null, $reset);
 
-            if (!$noPassword) {
+            if ('password' === $this->configuration['grant_type']) {
                 $this->configuration['username'] = $this->getConfigValue($output, 'Username', isset($this->configuration['username'])?$this->configuration['username']:null, $reset);
-                $this->configuration['grant_type'] = 'password';
             }
-        }
-
-        //even if we are not reseting credentials, we can switch to "no password" mode
-        if ($noPassword) {
-            $this->configuration['grant_type'] = 'client_credentials';
         }
 
         //build form params
@@ -88,14 +130,20 @@ class LoginCommand extends Command
         ];
 
         if ('password' === $this->configuration['grant_type']) {
-            $output->writeln("> You are using \"password\" grant type. If you are allowed to use \"client_credentials\" OAuth2 grant type");
-            $output->writeln(sprintf("> and don't want to type your password each time, please run command <info>%s login --no-password</info> anytime.", $_SERVER['argv'][0]));
-            if (!$password = $dialog->askHiddenResponse(
-                $output,
-                '<question>Password</question>: ',
-                false
-            )) {
-                return 1;
+            if (!isset($this->configuration['password'])) {
+                if (!$password = $dialog->askHiddenResponse(
+                    $output,
+                    '<question>Password</question>: ',
+                    false
+                )) {
+                    return 1;
+                }
+
+                if ($savePassword) {
+                    $this->configuration['password'] = $password;
+                }
+            } else {
+                $password = $this->configuration['password'];
             }
 
             $params = array_merge($params, [

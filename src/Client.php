@@ -4,6 +4,9 @@ namespace Creads\Partners;
 
 use GuzzleHttp\Client as GuzzleClient;
 
+/**
+ * @todo use a handler to set oauth bearer token
+ */
 class Client extends GuzzleClient
 {
     /**
@@ -20,8 +23,6 @@ class Client extends GuzzleClient
             ];
         }
         parent::__construct($config);
-
-
     }
 
     /**
