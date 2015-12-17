@@ -124,11 +124,15 @@ If you don't need to use the library as a dependency but want to interract with 
 You can install the binary globally with composer:
 
     composer global require creads/partners-api:@dev
-    
+
 Then add the bin directory of composer to your PATH in your ~/.bash_profile (or ~/.bashrc) like this:
 
     export PATH=~/.composer/vendor/bin:$PATH
-    
+
+You can update the application later with:
+
+    composer global update creads/partners-api
+
 ### Usage
 
 Get some help:
