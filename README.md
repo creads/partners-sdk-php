@@ -1,3 +1,6 @@
+creads/partners-api
+-------------------
+
 A simple PHP client and CLI for Creads Partners API.
 
 ## Use the library in your project
