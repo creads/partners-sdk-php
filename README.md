@@ -1,8 +1,8 @@
-# partners-api-php
-
 A simple PHP client and CLI for Creads Partners API.
 
-## Installing Partners API PHP
+## Use the library in your project
+
+### Installation
 
 The recommended way to install Guzzle is through
 [Composer](http://getcomposer.org).
@@ -19,7 +19,7 @@ Run the Composer command to install the latest stable version:
 composer.phar require creads/partners-api
 ```
 
-## Use the library
+### Usage
 
 After installing, you need to require Composer's autoloader:
 
@@ -114,6 +114,19 @@ if (404 == $e->getResponse()->getStatusCode()) {
 ```
 
 ## Use the CLI application
+
+### Installation
+
+If you don't need to use the library as a dependency but want to interract with Cread Partners API from your CLI.
+You can install the binary globally with composer:
+
+    composer global require creads/partners-api:@dev
+    
+Then add the bin directory of composer to your PATH in your ~/.bash_profile (or ~/.bashrc) like this:
+
+    export PATH=~/.composer/vendor/bin:$PATH
+    
+### Usage
 
 Get some help:
 
