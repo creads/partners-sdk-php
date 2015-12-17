@@ -2,11 +2,9 @@
 
 namespace Creads\Partners\Console\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Console\Command\Command;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class LoginCommand extends Command
@@ -59,8 +57,8 @@ class LoginCommand extends Command
         $savePassword = $input->getOption('save-password', false);
 
         if (!$this->configuration->exists()) {
-            $this->configuration['grant_type'] = 'password';
-        } else if ($type && $this->configuration['grant_type'] !== $type) {
+            $this->configuration['grant_type'] = $type ? $type : 'password';
+        } elseif ($type && $this->configuration['grant_type'] !== $type) {
             //if grant type was forced to change
             $this->configuration['grant_type'] = $type;
 
@@ -91,26 +89,24 @@ class LoginCommand extends Command
         }
 
         if (!$this->configuration->exists() || $reset) {
-
             $output->writeln("Please provide your credentials (won't be asked next time).");
 
             unset($this->configuration['password']);
 
-            $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id'])?$this->configuration['client_id']:null, $reset);
+            $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id']) ? $this->configuration['client_id'] : null, $reset);
 
-            $this->configuration['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($this->configuration['client_secret'])?$this->configuration['client_secret']:null, $reset);
+            $this->configuration['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($this->configuration['client_secret']) ? $this->configuration['client_secret'] : null, $reset);
 
             if ('password' === $this->configuration['grant_type']) {
-                $this->configuration['username'] = $this->getConfigValue($output, 'Username', isset($this->configuration['username'])?$this->configuration['username']:null, $reset);
+                $this->configuration['username'] = $this->getConfigValue($output, 'Username', isset($this->configuration['username']) ? $this->configuration['username'] : null, $reset);
             }
         }
 
         //build form params
         $params = [
             'grant_type' => $this->configuration['grant_type'],
-            'scope' => 'base'
+            'scope' => 'base',
         ];
-
         if ('password' === $this->configuration['grant_type']) {
             if (!isset($this->configuration['password'])) {
                 if (!$password = $dialog->askHiddenResponse(
@@ -139,11 +135,11 @@ class LoginCommand extends Command
         try {
             $response = $client->post('/oauth2/token', [
                 'auth' => [$this->configuration['client_id'], $this->configuration['client_secret']],
-                'form_params' => $params
+                'form_params' => $params,
             ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $data = json_decode($e->getResponse()->getBody(), true);
-            $message = isset($data['error_description'])?$data['error_description']:($e->getResponse()->getStatusCode() . ' ' . $e->getResponse()->getReasonPhrase());
+            $message = isset($data['error_description']) ? $data['error_description'] : ($e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase());
             throw new \Exception($message);
         }
 
@@ -152,8 +148,8 @@ class LoginCommand extends Command
         }
 
         $this->configuration['access_token'] = $data['access_token'];
-        $this->configuration['expires_at'] = isset($data['expires_in'])?(time()+$data['expires_in']):null;
-        $this->configuration['refresh_token'] = isset($data['refresh_token'])?$data['refresh_token']:null;
+        $this->configuration['expires_at'] = isset($data['expires_in']) ? (time() + $data['expires_in']) : null;
+        $this->configuration['refresh_token'] = isset($data['refresh_token']) ? $data['refresh_token'] : null;
 
         $this->configuration->store();
 
@@ -161,18 +157,17 @@ class LoginCommand extends Command
     }
 
     /**
-     *
-     * @param OutputInterface   $output
-     * @param string            $label
-     * @param string|null       $previous
-     * @param bool              $reset
+     * @param OutputInterface $output
+     * @param string          $label
+     * @param string|null     $previous
+     * @param bool            $reset
      */
     protected function getConfigValue($output, $label, $previous, $reset)
     {
         $dialog = $this->getHelperSet()->get('dialog');
         if (!$value = $dialog->ask(
             $output,
-            sprintf('<question>%s</question>%s: ', $label, $previous?(' [<comment>'.$previous.'</comment>]'):''),
+            sprintf('<question>%s</question>%s: ', $label, $previous ? (' [<comment>'.$previous.'</comment>]') : ''),
             false
         )) {
             if ($reset) {
