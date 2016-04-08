@@ -7,7 +7,7 @@ A simple PHP client and CLI for Creads Partners API.
 
 ### Installation
 
-The recommended way to install Guzzle is through
+The recommended way to install the library is through
 [Composer](http://getcomposer.org).
 
 Install Composer:
