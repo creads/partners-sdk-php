@@ -19,21 +19,44 @@ class Client extends GuzzleClient
 
         if (!empty($config['access_token'])) {
             $config['headers'] = [
-                'Authorization' => 'Bearer ' . $config['access_token']
+                'Authorization' => 'Bearer '.$config['access_token'],
             ];
         }
         parent::__construct($config);
     }
 
     /**
-     * Get default configuration to apply the client
+     * Get default configuration to apply the client.
+     *
      * @return array
      */
     protected function getDefaultClientConfig()
     {
         return [
-            'base_uri' => 'https://api.creads-partners.com/v1'
+            'base_uri' => 'https://api.creads-partners.com/v1',
         ];
+    }
+
+    public function put($uri = '', $body = [])
+    {
+        return parent::request('PUT', $uri, [
+            'json' => $body,
+        ]);
+    }
+
+    public function post($uri = '', $body = [])
+    {
+        return parent::request('POST', $uri, [
+            'json' => $body,
+        ]);
+    }
+
+    public function get($uri = '')
+    {
+        $response = parent::get($uri);
+        $parsedResponse = json_decode($response->getBody(), true);
+
+        return $parsedResponse;
     }
 
     // /**
