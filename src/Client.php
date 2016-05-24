@@ -37,18 +37,18 @@ class Client extends GuzzleClient
         ];
     }
 
-    public function put($uri = '', $body = [])
+    public function put($uri, $body = [], $options = [])
     {
-        return parent::request('PUT', $uri, [
-            'json' => $body,
-        ]);
+        $requestBody = array_merge($options, ['json' => $body]);
+
+        return parent::request('PUT', $uri, $requestBody);
     }
 
-    public function post($uri = '', $body = [])
+    public function post($uri, $body = [], $options = [])
     {
-        return parent::request('POST', $uri, [
-            'json' => $body,
-        ]);
+        $requestBody = array_merge($options, ['json' => $body]);
+
+        return parent::request('POST', $uri, $requestBody);
     }
 
     public function get($uri = '')
