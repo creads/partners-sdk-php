@@ -10,6 +10,13 @@ use GuzzleHttp\Client as GuzzleClient;
 class Client extends GuzzleClient
 {
     /**
+     * The API format to send/recieve : json, xml...
+     *
+     * @var string
+     */
+    protected $format = 'json';
+
+    /**
      * Constructor
      * {@inheritdoc}
      */
@@ -21,6 +28,9 @@ class Client extends GuzzleClient
             $config['headers'] = [
                 'Authorization' => 'Bearer '.$config['access_token'],
             ];
+        }
+        if (!empty($config['format']) && in_array($config['format'], ['json'])) {
+            $this->format = $config['format'];
         }
         parent::__construct($config);
     }
@@ -39,14 +49,14 @@ class Client extends GuzzleClient
 
     public function put($uri, $body = [], $options = [])
     {
-        $requestBody = array_merge($options, ['json' => $body]);
+        $requestBody = array_merge($options, [$this->format => $body]);
 
         return parent::request('PUT', $uri, $requestBody);
     }
 
     public function post($uri, $body = [], $options = [])
     {
-        $requestBody = array_merge($options, ['json' => $body]);
+        $requestBody = array_merge($options, [$this->format => $body]);
 
         return parent::request('POST', $uri, $requestBody);
     }
@@ -54,7 +64,12 @@ class Client extends GuzzleClient
     public function get($uri = '')
     {
         $response = parent::get($uri);
-        $parsedResponse = json_decode($response->getBody(), true);
+        switch ($this->format) {
+            case 'json':
+            default:
+                $parsedResponse = json_decode($response->getBody(), true);
+                break;
+        }
 
         return $parsedResponse;
     }
