@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Question\Question;
 
 class LoginCommand extends Command
 {
@@ -49,7 +50,7 @@ class LoginCommand extends Command
         $style = new OutputFormatterStyle('black', 'white');
         $output->getFormatter()->setStyle('fire', $style);
 
-        $dialog = $this->getHelperSet()->get('dialog');
+        $questionHelper = $this->getHelperSet()->get('question');
         $formatter = $this->getHelperSet()->get('formatter');
 
         $reset = $input->getOption('reset', false);
@@ -93,12 +94,12 @@ class LoginCommand extends Command
 
             unset($this->configuration['password']);
 
-            $this->configuration['client_id'] = $this->getConfigValue($output, 'Client ID', isset($this->configuration['client_id']) ? $this->configuration['client_id'] : null, $reset);
+            $this->configuration['client_id'] = $this->getConfigValue($input, $output, 'Client ID', isset($this->configuration['client_id']) ? $this->configuration['client_id'] : null, $reset);
 
-            $this->configuration['client_secret'] = $this->getConfigValue($output, 'Client Secret', isset($this->configuration['client_secret']) ? $this->configuration['client_secret'] : null, $reset);
+            $this->configuration['client_secret'] = $this->getConfigValue($input, $output, 'Client Secret', isset($this->configuration['client_secret']) ? $this->configuration['client_secret'] : null, $reset);
 
             if ('password' === $this->configuration['grant_type']) {
-                $this->configuration['username'] = $this->getConfigValue($output, 'Username', isset($this->configuration['username']) ? $this->configuration['username'] : null, $reset);
+                $this->configuration['username'] = $this->getConfigValue($input, $output, 'Username', isset($this->configuration['username']) ? $this->configuration['username'] : null, $reset);
             }
         }
 
@@ -109,10 +110,13 @@ class LoginCommand extends Command
         ];
         if ('password' === $this->configuration['grant_type']) {
             if (!isset($this->configuration['password'])) {
-                if (!$password = $dialog->askHiddenResponse(
+                $question = new Question('<question>Password</question>: ');
+                $question->setHidden(true);
+                $question->setHiddenFallback(false);
+                if (!$password = $questionHelper->ask(
+                    $input,
                     $output,
-                    '<question>Password</question>: ',
-                    false
+                    $question
                 )) {
                     return 1;
                 }
@@ -162,13 +166,14 @@ class LoginCommand extends Command
      * @param string|null     $previous
      * @param bool            $reset
      */
-    protected function getConfigValue($output, $label, $previous, $reset)
+    protected function getConfigValue($input, $output, $label, $previous, $reset)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
-        if (!$value = $dialog->ask(
+        $questionHelper = $this->getHelperSet()->get('question');
+        $question = new Question(sprintf('<question>%s</question>%s: ', $label, $previous ? (' [<comment>'.$previous.'</comment>]') : ''));
+        if (!$value = $questionHelper->ask(
+            $input,
             $output,
-            sprintf('<question>%s</question>%s: ', $label, $previous ? (' [<comment>'.$previous.'</comment>]') : ''),
-            false
+            $question
         )) {
             if ($reset) {
                 $value = $previous;
