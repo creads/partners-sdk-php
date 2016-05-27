@@ -43,7 +43,7 @@ class Client extends GuzzleClient
     protected function getDefaultClientConfig()
     {
         return [
-            'base_uri' => 'https://api.creads-partners.com/v1',
+            'base_uri' => 'https://api.creads-partners.com/v1/',
         ];
     }
 
