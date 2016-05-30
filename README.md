@@ -55,7 +55,7 @@ echo json_decode($response->getBody(), true)['version'];
 Get information about me:
 
 ```php
-$response = $client->get('/me');
+$response = $client->get('me');
 echo json_decode($response->getBody(), true)['firstname'];
 //John
 ```
@@ -63,7 +63,7 @@ echo json_decode($response->getBody(), true)['firstname'];
 Update my firstname:
 
 ```php
-$client->put('/me', [
+$client->put('me', [
     'firstname' => 'John'
 ]);
 ```
@@ -71,7 +71,7 @@ $client->put('/me', [
 Create a project:
 
 ```php
-$client->post('/projects', [
+$client->post('projects', [
 	'title' => '',
 	'description' => '',
 	'organization' => '',
