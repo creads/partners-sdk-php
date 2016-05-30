@@ -61,7 +61,7 @@ class Client extends GuzzleClient
         return parent::request('POST', $uri, $requestBody);
     }
 
-    public function get($uri = '')
+    public function get($uri)
     {
         $response = parent::get($uri);
         switch ($this->format) {
