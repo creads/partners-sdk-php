@@ -94,7 +94,7 @@ $client->post('projects', [
 
 ### Authentication
 
-To provide a token as explained in [Usage](###Usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
+To provide a token as explained in [Usage](#Usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
 
 ```
 curl -X POST 
@@ -130,6 +130,7 @@ function getToken()
     {
         if (!$token) {
             $client = new GuzzleClient(['base_uri' => 'https://api.creads-partners.com/v1/', 'http_errors' => false]);
+            // starting the path with '/' trims the present path ('/v1/') from the base_uri
             $res = $client->request(
                 'POST',
                 '/oauth2/token',
