@@ -32,7 +32,7 @@ require 'vendor/autoload.php';
 
 First you need to get a fresh OAuth2 access token:
 
-...
+> See the [Authentication](#authentication) part below to see how.
 
 Instance a new client with the token:
 
@@ -94,7 +94,7 @@ $client->post('projects', [
 
 ### Authentication
 
-To provide a token as explained in [Usage](#Usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
+To provide a token as explained in [Usage](#usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
 
 ```
 curl -X POST 
