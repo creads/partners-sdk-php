@@ -37,7 +37,6 @@ First you need to get a fresh OAuth2 access token:
 Instance a new client with the token:
 
 ```php
-<?php 
 use Creads\Partners\Client;
 
 $client = new Client([
@@ -48,7 +47,6 @@ $client = new Client([
 Get information about the API:
 
 ```php
-<?php 
 $response = $client->get('/');
 echo json_decode($response->getBody(), true)['version'];
 //1.0.0
@@ -57,7 +55,6 @@ echo json_decode($response->getBody(), true)['version'];
 Get information about me:
 
 ```php
-<?php 
 $response = $client->get('me');
 echo json_decode($response->getBody(), true)['firstname'];
 //John
@@ -66,7 +63,6 @@ echo json_decode($response->getBody(), true)['firstname'];
 Update my firstname:
 
 ```php
-<?php 
 $client->put('me', [
     'firstname' => 'John'
 ]);
@@ -81,7 +77,6 @@ $client->delete('comments/1234567891011');
 Create a project:
 
 ```php
-<?php 
 $client->post('projects', [
 	'title' => '',
 	'description' => '',
@@ -97,7 +92,7 @@ $client->post('projects', [
 To provide a token as explained in [Usage](#usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
 
 ```
-curl -X POST 
+curl -X POST
 -F "grant_type=client_credentials"
 -F "client_id=your_app_id"
 -F "client_secret=your_app_secret"
@@ -119,7 +114,6 @@ The `access_token` property is what you need to join to your requests.
 Using **PHP** and **an HTTP Client** (Guzzle, for instance), you could wrap **Partners API PHP Client** in order to ensure you have an access token or get one before sending any request and pass it to our Client.
 
 ```php
-<?php 
 
 use Creads\Partners\Client as PartnersClient;
 use GuzzleHttp\Client as GuzzleClient;
@@ -180,7 +174,6 @@ $partnersClient = new PartnersClient($config);
 When HTTP errors occurs (4xx and 5xx responses) , the library throws a `GuzzleHttp\Exception\ClientException` object:
 
 ```php
-<?php 
 use GuzzleHttp\Exception\ClientException;
 
 try {
@@ -199,7 +192,6 @@ try {
 If you prefer to disable throwing exceptions on an HTTP protocol error:
 
 ```php
-<?php 
 $client = new Client([
     'access_token' => $token,
     'http_errors' => false
