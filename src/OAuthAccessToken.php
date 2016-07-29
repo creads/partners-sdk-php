@@ -23,21 +23,22 @@ class OAuthAccessToken implements AuthenticationInterface
         $this->params = $params;
 
         if (isset($params['grant_type'])) {
-            if (in_array($params['grant_type'], ['client_credentials','password'])) {
+            if (in_array($params['grant_type'], ['client_credentials', 'password'])) {
                 throw new \Exception(sprintf('Unrecognized grant_type: %s', $params['grant_type']));
             }
-            if ('password' === $params['grant_type'] && (!isset($params['username']) || !isset($params['password'])) ) {
+            if ('password' === $params['grant_type'] && (!isset($params['username']) || !isset($params['password']))) {
                 throw new \Exception("'password' grant_type required a username and a password");
             }
         }
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         return [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->access_token
-            ]
-        ]
+                'Authorization' => 'Bearer '.$this->access_token,
+            ],
+        ];
     }
 
     public function getAccessToken($scope = 'base', $noCache = false)
@@ -54,21 +55,21 @@ class OAuthAccessToken implements AuthenticationInterface
                 ],
                 [
                     'name' => 'grant_type',
-                    'contents' => isset($this->params['grant_type'])?$this->params['grant_type']:'client_credentials',
+                    'contents' => isset($this->params['grant_type']) ? $this->params['grant_type'] : 'client_credentials',
                 ],
                 [
                     'name' => 'scope',
                     'contents' => 'base',
-                ]
+                ],
             ];
             if (isset($this->params['grant_type']) && $this->params['grant_type'] === 'password') {
                 $multipartBody[] = [
                     'name' => 'username',
-                    'contents' => $this->params['username']
+                    'contents' => $this->params['username'],
                 ];
                 $multipartBody[] = [
                     'name' => 'password',
-                    'contents' => $this->params['password']
+                    'contents' => $this->params['password'],
                 ];
             }
             $client = new GuzzleClient(['base_uri' => $this->baseUri, 'http_errors' => false]);
@@ -76,7 +77,7 @@ class OAuthAccessToken implements AuthenticationInterface
                 'POST',
                 '/oauth2/token',
                 [
-                    'multipart' => $multipartBody
+                    'multipart' => $multipartBody,
                 ]
             );
             if ($res->getStatusCode() > 399) {
@@ -92,6 +93,7 @@ class OAuthAccessToken implements AuthenticationInterface
             return $body['access_token'];
         } else {
             $cachedToken = json_decode(file_get_contents($this->getTokenCacheFilePath()), true);
+
             return $cachedToken['access_token'];
         }
     }
@@ -104,7 +106,8 @@ class OAuthAccessToken implements AuthenticationInterface
         }
         $expiresAt = json_decode(file_get_contents($this->getTokenCacheFilePath()), true)['expires_at'];
         $now = new \DateTime();
-        return ($expiresAt <= $now->getTimestamp());
+
+        return $expiresAt <= $now->getTimestamp();
     }
 
     protected function writeTokenCache($body)
