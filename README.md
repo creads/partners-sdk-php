@@ -30,17 +30,27 @@ After installing, you need to require Composer's autoloader:
 require 'vendor/autoload.php';
 ```
 
-First you need to get a fresh OAuth2 access token:
-
-> See the [Authentication](#authentication) part below to see how.
-
-Instance a new client with the token:
+First you need to instantiate the Client with an OAuthAuthentication
 
 ```php
 use Creads\Partners\Client;
+use Creads\Partners\OAuthAccessToken;
 
+$authentication = new OAuthAuthenticationToken('CLIENT_ID', 'CLIENT_SECRET');
+$client = new Client([], $authentication);
+```
+
+Or if you have an access token from somewhere else:
+
+```php
+use Creads\Partners\Client;
+use Creads\Partners\OAuthAccessToken;
+
+// Here we get a token
+// $authentication = new OAuthAuthenticationToken(...);
+// $access_token = $authentication->getAccessToken();
 $client = new Client([
-    'access_token' => $token
+    'access_token' => $access_token
 ]);
 ```
 
@@ -85,88 +95,6 @@ $client->post('projects', [
     'product' => ''
     'price' => ''
 ]);
-```
-
-### Authentication
-
-To provide a token as explained in [Usage](#usage), you need to ask for one. As described in [OAuth2 Specification](https://tools.ietf.org/html/rfc6749) this is achieved via a `token` endpoint, in our case:
-
-```
-curl -X POST
--F "grant_type=client_credentials"
--F "client_id=your_app_id"
--F "client_secret=your_app_secret"
-"https://api.creads-partners.com/oauth2/token"
-```
-
-Which will return something like this :
-
-```json
-{
-  "access_token": "YOUR_ACCESS_TOKEN",
-  "expires_in": 3600,
-  "token_type": "bearer"
-}
-```
-
-The `access_token` property is what you need to join to your requests.
-
-Using **PHP** and **an HTTP Client** (Guzzle, for instance), you could wrap **Partners API PHP Client** in order to ensure you have an access token or get one before sending any request and pass it to our Client.
-
-```php
-
-use Creads\Partners\Client as PartnersClient;
-use GuzzleHttp\Client as GuzzleClient;
-
-$token = null;
-
-function getToken()
-    {
-        if (!$token) {
-            $client = new GuzzleClient(['base_uri' => 'https://api.creads-partners.com/v1/', 'http_errors' => false]);
-            // starting the path with '/' trims the present path ('/v1/') from the base_uri
-            $res = $client->request(
-                'POST',
-                '/oauth2/token',
-                [
-                    'multipart' => [
-                        [
-                            'name' => 'client_id',
-                            'contents' => 'YOUR_APP_ID',
-                        ],
-                        [
-                            'name' => 'client_secret',
-                            'contents' => 'YOUR_APP_SECRET',
-                        ],
-                        [
-                            'name' => 'grant_type',
-                            'contents' => 'client_credentials',
-                        ],
-                    ],
-                ]
-            );
-            if ($res->getStatusCode() > 399) {
-                throw new \Exception(sprintf("Couldnt get a token: (%s):\n %s", $res->getStatusCode(), $res->getBody()));
-            }
-            $body = json_decode($res->getBody(), true);
-            if (!isset($body['access_token'])) {
-                throw new \Exception('Could not retrieve authorization from Partners.');
-            }
-
-            $token = $body['access_token'];
-        }
-
-        return $token;
-    }
-
-
- $config = [
-    'access_token' => getToken(),
-    'base_uri' => 'https://api.creads-partners.com/v1/',
-	];
-
-$partnersClient = new PartnersClient($config);
-// Here $partnersClient is ready to be used as explained before !
 ```
 
 ### Errors and exceptions handling
