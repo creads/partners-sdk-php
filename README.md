@@ -37,7 +37,7 @@ use Creads\Partners\Client;
 use Creads\Partners\OAuthAccessToken;
 
 $authentication = new OAuthAuthenticationToken('CLIENT_ID', 'CLIENT_SECRET');
-$client = new Client([], $authentication);
+$client = new Client($authentication, []);
 ```
 
 Or if you have an access token from somewhere else:
@@ -49,7 +49,7 @@ use Creads\Partners\OAuthAccessToken;
 // Here we get a token
 // $authentication = new OAuthAuthenticationToken(...);
 // $access_token = $authentication->getAccessToken();
-$client = new Client([
+$client = new Client(null, [
     'access_token' => $access_token
 ]);
 ```
