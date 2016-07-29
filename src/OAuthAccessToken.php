@@ -6,7 +6,6 @@ use GuzzleHttp\Client as GuzzleClient;
 
 class OAuthAccessToken implements AuthenticationInterface
 {
-    protected $access_token = null;
     protected $baseUri = 'https://connect.creads-partners.com/';
     protected $params = [];
     protected $clientId;
@@ -36,7 +35,7 @@ class OAuthAccessToken implements AuthenticationInterface
     {
         return [
             'headers' => [
-                'Authorization' => 'Bearer '.$this->access_token,
+                'Authorization' => 'Bearer '.$this->getAccessToken(),
             ],
         ];
     }
