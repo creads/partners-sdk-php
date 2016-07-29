@@ -69,6 +69,31 @@ class Client extends GuzzleClient
         return $parsedResponse;
     }
 
+    public function postFile($uri, $realFilepath, $filename, $body = [])
+    {
+        $multipartBody = [
+            [
+                'name' => 'file',
+                'contents' => fopen($realFilepath, 'r'),
+                'filename' => $filename,
+            ],
+            [
+                'name' => 'filepath',
+                'contents' => '/'.$filename,
+            ],
+        ];
+        $body = array_merge($multipartBody, $body);
+        $res = parent::request(
+            'POST',
+            $uri,
+            [
+                'multipart' => $body,
+            ]
+        );
+
+        return $res;
+    }
+
     // /**
     //  * Returns options to apply every request
     //  * @return array

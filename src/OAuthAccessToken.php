@@ -46,11 +46,11 @@ class OAuthAccessToken implements AuthenticationInterface
             $multipartBody = [
                 [
                     'name' => 'client_id',
-                    'contents' => $clientId,
+                    'contents' => $this->clientId,
                 ],
                 [
                     'name' => 'client_secret',
-                    'contents' => $clientSecret,
+                    'contents' => $this->clientSecret,
                 ],
                 [
                     'name' => 'grant_type',
@@ -109,11 +109,20 @@ class OAuthAccessToken implements AuthenticationInterface
         return $expiresAt <= $now->getTimestamp();
     }
 
+    protected function getTokenCacheFilePath()
+    {
+        if (isset($params['cache_dir'])) {
+            return rtrim($params['cache_dir'], '/').'/partners_api_token';
+        }
+
+        return rtrim(sys_get_temp_dir(), '/').'/partners_api_token';
+    }
+
     protected function writeTokenCache($body)
     {
         $now = new \DateTime();
         $expiresAt = $now->getTimestamp() + intval($body['expires_in']);
-        $body['expires_at'] = $expires_at;
+        $body['expires_at'] = $expiresAt;
         file_put_contents($this->getTokenCacheFilePath(), json_encode($body));
     }
 }
