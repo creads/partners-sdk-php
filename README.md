@@ -97,6 +97,39 @@ $client->post('projects', [
 ]);
 ```
 
+Upload a file:
+
+> The API only supports JSON for now, except for file upload that requires `multipart`
+
+```php
+$multipartBody = ;
+        $client->request(
+            'POST',
+            'files',
+            [
+                'multipart' =>
+                [
+                    [
+                        'name' => 'file',
+                        'contents' => fopen('/tmp/myfile.jpg', 'r'),
+                        'filename' => 'uploadedName.jpg',
+                    ],
+                    [
+                        'name' => 'filepath',
+                        'contents' => '/uploadedName.jpg',
+                    ],
+                    // Additionnal data joined to the file (eg. to make the file only visible to your coworkers) :
+                    [
+                        'name' => 'organization.gid',
+                        'contents' => 'my_organization_id',
+                    ],
+                ]
+            ]
+        );
+```
+
+
+
 ### Errors and exceptions handling
 
 When HTTP errors occurs (4xx and 5xx responses) , the library throws a `GuzzleHttp\Exception\ClientException` object:
