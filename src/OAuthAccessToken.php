@@ -19,7 +19,7 @@ class OAuthAccessToken implements AuthenticationInterface
 
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
-        $this->params = $params;
+        $this->params = array_merge($this->getDefaultParameters(), $params);
 
         if (isset($params['grant_type'])) {
             if (in_array($params['grant_type'], ['client_credentials', 'password'])) {
@@ -40,9 +40,16 @@ class OAuthAccessToken implements AuthenticationInterface
         ];
     }
 
-    public function getAccessToken($scope = 'base', $noCache = false)
+    protected function getDefaultParameters()
     {
-        if ($noCache || $this->isCacheExpired()) {
+        return [
+            'tokens_dir' => sys_get_temp_dir(),
+       ];
+    }
+
+    public function getAccessToken($scope = 'base', $noStoring = false)
+    {
+        if ($noStoring || $this->isTokenExpired()) {
             $multipartBody = [
                 [
                     'name' => 'client_id',
@@ -87,42 +94,41 @@ class OAuthAccessToken implements AuthenticationInterface
                 throw new \Exception('Could not retrieve authorization from Partners.');
             }
 
-            $this->writeTokenCache($body);
+            $this->storeToken($body);
 
             return $body['access_token'];
         } else {
-            $cachedToken = json_decode(file_get_contents($this->getTokenCacheFilePath()), true);
+            $storedToken = json_decode(file_get_contents($this->getTokenFilePath()), true);
 
-            return $cachedToken['access_token'];
+            return $storedToken['access_token'];
         }
     }
 
-    protected function isCacheExpired()
+    protected function isTokenExpired()
     {
-        $stat = @stat($this->getTokenCacheFilePath());
+        $stat = @stat($this->getTokenFilePath());
         if (!$stat) {
             return true;
         }
-        $expiresAt = json_decode(file_get_contents($this->getTokenCacheFilePath()), true)['expires_at'];
+        $expiresAt = json_decode(file_get_contents($this->getTokenFilePath()), true)['expires_at'];
+        if (is_int($expiresAt)) {
+            return true;
+        }
         $now = new \DateTime();
 
         return $expiresAt <= $now->getTimestamp();
     }
 
-    protected function getTokenCacheFilePath()
+    protected function getTokenFilePath()
     {
-        if (isset($params['cache_dir'])) {
-            return rtrim($params['cache_dir'], '/').'/partners_api_token';
-        }
-
-        return rtrim(sys_get_temp_dir(), '/').'/partners_api_token';
+        return rtrim($params['tokens_dir'], '/').'/partners_api_token';
     }
 
-    protected function writeTokenCache($body)
+    protected function storeToken($body)
     {
         $now = new \DateTime();
         $expiresAt = $now->getTimestamp() + intval($body['expires_in']);
         $body['expires_at'] = $expiresAt;
-        file_put_contents($this->getTokenCacheFilePath(), json_encode($body));
+        file_put_contents($this->getTokenFilePath(), json_encode($body));
     }
 }

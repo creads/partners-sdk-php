@@ -37,7 +37,7 @@ use Creads\Partners\Client;
 use Creads\Partners\OAuthAccessToken;
 
 $authentication = new OAuthAuthenticationToken('CLIENT_ID', 'CLIENT_SECRET');
-$client = new Client($authentication, []);
+$client = new Client($authentication);
 ```
 
 Or if you have an access token from somewhere else:
