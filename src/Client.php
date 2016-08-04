@@ -4,9 +4,6 @@ namespace Creads\Partners;
 
 use GuzzleHttp\Client as GuzzleClient;
 
-/**
- * @todo use a handler to set oauth bearer token
- */
 class Client extends GuzzleClient
 {
     /**
@@ -20,14 +17,12 @@ class Client extends GuzzleClient
      * Constructor
      * {@inheritdoc}
      */
-    public function __construct(array $config = [])
+    public function __construct(AuthenticationInterface $authentication = null, array $config = [])
     {
         $config = array_merge($this->getDefaultClientConfig(), $config);
 
-        if (!empty($config['access_token'])) {
-            $config['headers'] = [
-                'Authorization' => 'Bearer '.$config['access_token'],
-            ];
+        if ($authentication) {
+            $config = array_merge($config, $authentication->getConfig());
         }
         if (!empty($config['format']) && in_array($config['format'], ['json'])) {
             $this->format = $config['format'];
