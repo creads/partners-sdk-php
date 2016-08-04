@@ -121,7 +121,7 @@ class OAuthAccessToken implements AuthenticationInterface
 
     protected function getTokenFilePath()
     {
-        return rtrim($params['tokens_dir'], '/').'/partners_api_token';
+        return rtrim($this->params['tokens_dir'], '/').'/partners_api_token';
     }
 
     protected function storeToken($body)
