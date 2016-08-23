@@ -65,7 +65,7 @@ class OAuthAccessToken implements AuthenticationInterface
                 ],
                 [
                     'name' => 'scope',
-                    'contents' => 'base',
+                    'contents' => $scope,
                 ],
             ];
             if (isset($this->params['grant_type']) && $this->params['grant_type'] === 'password') {
