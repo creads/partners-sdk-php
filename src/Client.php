@@ -69,6 +69,52 @@ class Client extends GuzzleClient
         return $parsedResponse;
     }
 
+    public function postFile($realFilePath, $uploadFileName = null)
+    {
+        if (!$uploadFileName) {
+            // No specified filename, use the uploaded one
+            $uploadFileName = pathinfo($realFilePath)['basename'];
+        }
+        $me = $this->get('me');
+        $uploadUrl = $me['upload_form']['form_attributes']['action'];
+        $uploadUrl = str_replace('${filename}', $uploadFileName, $uploadUrl);
+
+        $multipartBody = [];
+
+        // Add Amazon specific data needed for authentication (order matters)
+        foreach ($me['upload_form']['form_inputs'] as $key => $value) {
+            if ($key === 'key') {
+                $value = str_replace('${filename}', $uploadFileName, $value);
+            }
+            $multipartBody[] = [
+                'name' => $key,
+                'contents' => $value,
+            ];
+        }
+
+        // Build the multipart file upload (order matters)
+        $multipartBody[] = [
+            'name' => 'file',
+            'contents' => fopen($realFilePath, 'rb'),
+            'filename' => $uploadFileName,
+        ];
+        $multipartBody[] = [
+            'name' => 'filepath',
+            'contents' => '/'.$uploadFileName,
+        ];
+
+        return $this->request(
+            'POST',
+            $uploadUrl,
+            [
+                'headers' => [
+                    'Authorization' => null,
+                ],
+                'multipart' => $multipartBody,
+            ]
+        );
+    }
+
     // /**
     //  * Returns options to apply every request
     //  * @return array
