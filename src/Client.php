@@ -136,7 +136,7 @@ class Client extends GuzzleClient
             isset($this->me['upload_form']['form_inputs']) &&
             isset($this->me['upload_form']['form_inputs']['X-Amz-Date'])
            ) {
-            $expireAt = new \DateTime($this->me['form_inputs']['X-Amz-Date']);
+            $expireAt = new \DateTime($this->me['upload_form']['form_inputs']['X-Amz-Date']);
             $expireAt->modify(sprintf('+ %s sec', self::FILE_SIGNATURE_EXPIRATION));
             $now = new \DateTime();
             if ($now <= $expireAt) {
