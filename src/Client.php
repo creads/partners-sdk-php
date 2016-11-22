@@ -6,12 +6,22 @@ use GuzzleHttp\Client as GuzzleClient;
 
 class Client extends GuzzleClient
 {
+    const FILE_SIGNATURE_EXPIRATION = 600; // 10 minutes in seconds
+
     /**
      * The API format to send/recieve : json, xml...
      *
      * @var string
      */
     protected $format = 'json';
+
+    /**
+     * If fetched, the user's info from the API
+     * Useful for fileuploads.
+     *
+     * @var array|null
+     */
+    protected $me = null;
 
     /**
      * Constructor
@@ -67,6 +77,75 @@ class Client extends GuzzleClient
         }
 
         return $parsedResponse;
+    }
+
+    public function postFile($realFilePath, $uploadFileName = null)
+    {
+        if (!$uploadFileName) {
+            // No specified filename, use the uploaded one
+            $uploadFileName = pathinfo($realFilePath)['basename'];
+        }
+        $me = $this->getMe();
+        $uploadUrl = $me['upload_form']['form_attributes']['action'];
+        $uploadUrl = str_replace('${filename}', $uploadFileName, $uploadUrl);
+
+        $multipartBody = [];
+
+        // Add Amazon specific data needed for authentication (order matters)
+        foreach ($me['upload_form']['form_inputs'] as $key => $value) {
+            if ($key === 'key') {
+                $value = str_replace('${filename}', $uploadFileName, $value);
+            }
+            $multipartBody[] = [
+                'name' => $key,
+                'contents' => $value,
+            ];
+        }
+
+        // Build the multipart file upload (order matters)
+        $multipartBody[] = [
+            'name' => 'file',
+            'contents' => fopen($realFilePath, 'rb'),
+            'filename' => $uploadFileName,
+        ];
+        $multipartBody[] = [
+            'name' => 'filepath',
+            'contents' => '/'.$uploadFileName,
+        ];
+
+        return $this->request(
+            'POST',
+            $uploadUrl,
+            [
+                'headers' => [
+                    'Authorization' => null,
+                ],
+                'multipart' => $multipartBody,
+            ]
+        );
+    }
+
+    protected function getMe()
+    {
+        // If previous /me calls is not expired yet
+        // use the signature info already fetched
+        // If not, fetch new credentials
+        if (
+            $this->me &&
+            isset($this->me['upload_form']['form_inputs']) &&
+            isset($this->me['upload_form']['form_inputs']) &&
+            isset($this->me['upload_form']['form_inputs']['X-Amz-Date'])
+           ) {
+            $expireAt = new \DateTime($this->me['upload_form']['form_inputs']['X-Amz-Date']);
+            $expireAt->modify(sprintf('+ %s sec', self::FILE_SIGNATURE_EXPIRATION));
+            $now = new \DateTime();
+            if ($now <= $expireAt) {
+                return $this->me;
+            }
+        }
+        $this->me = $this->get('me');
+
+        return $this->me;
     }
 
     // /**
