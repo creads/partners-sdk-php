@@ -79,22 +79,23 @@ class Client extends GuzzleClient
         return $parsedResponse;
     }
 
-    public function postFile($realFilePath, $uploadFileName = null)
+    public function postFile($sourceFilepath, $destinationFilepath = null)
     {
-        if (!$uploadFileName) {
+        if (!$destinationFilepath) {
             // No specified filename, use the uploaded one
-            $uploadFileName = pathinfo($realFilePath)['basename'];
+            $destinationFilepath = pathinfo($sourceFilepath)['basename'];
         }
+
         $me = $this->getMe();
         $uploadUrl = $me['upload_form']['form_attributes']['action'];
-        $uploadUrl = str_replace('${filename}', $uploadFileName, $uploadUrl);
+        $uploadUrl = str_replace('${filename}', $destinationFilepath, $uploadUrl);
 
         $multipartBody = [];
 
         // Add Amazon specific data needed for authentication (order matters)
         foreach ($me['upload_form']['form_inputs'] as $key => $value) {
             if ($key === 'key') {
-                $value = str_replace('${filename}', $uploadFileName, $value);
+                $value = str_replace('${filename}', $destinationFilepath, $value);
             }
             $multipartBody[] = [
                 'name' => $key,
@@ -105,12 +106,7 @@ class Client extends GuzzleClient
         // Build the multipart file upload (order matters)
         $multipartBody[] = [
             'name' => 'file',
-            'contents' => fopen($realFilePath, 'rb'),
-            'filename' => $uploadFileName,
-        ];
-        $multipartBody[] = [
-            'name' => 'filepath',
-            'contents' => '/'.$uploadFileName,
+            'contents' => fopen($sourceFilepath, 'rb'),
         ];
 
         return $this->request(

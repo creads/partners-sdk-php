@@ -16,14 +16,14 @@ class UploadCommand extends Command
             ->setName('upload')
             ->setDescription('Upload a file resource')
             ->addArgument(
-              'filepath',
+              'source',
               InputArgument::REQUIRED,
-              'real file path of the file to upload'
+              'Source file path'
             )
             ->addArgument(
-              'filename',
+              'destination',
               InputArgument::OPTIONAL,
-              'Desired final filename for the file to upload'
+              'Destination file path'
             )
         ;
     }
@@ -33,8 +33,8 @@ class UploadCommand extends Command
         $json = $this->getHelperSet()->get('json');
         $configuration = $this->getHelperSet()->get('configuration');
 
-        $realFilePath = $input->getArgument('filepath');
-        $filename = $input->getArgument('filename');
+        $source = $input->getArgument('source');
+        $destination = $input->getArgument('destination');
 
         if (0 != $returnCode = $this->login($output)) {
             return $returnCode;
@@ -46,7 +46,7 @@ class UploadCommand extends Command
             'http_errors' => false,
         ]);
 
-        $response = $client->postFile($realFilePath, $filename);
+        $response = $client->postFile($source, $destination);
 
         $error = ($response->getStatusCode() >= 400);
 
