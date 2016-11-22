@@ -3,28 +3,30 @@
 namespace Creads\Partners\Console\Command;
 
 use Symfony\Component\Console\Command\Command as BaseCommand;
-use Creads\Partners\Console\Configuration;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class Command extends BaseCommand
 {
-    /**
-     * @var Creads\Partners\Console\Configuration
-     */
-    protected $configuration;
-
-    /**
-     * Constructor
-     * @param Configuration $configuration
-     * @param string        $name
-     */
-    public function __construct(Configuration $configuration, $name = null)
+    protected function login(OutputInterface $output)
     {
-        parent::__construct($name);
-        $this->configuration = $configuration;
+        $configuration = $this->getHelperSet()->get('configuration');
 
-        $this->configuration->load();
+        if (!$configuration->exists()
+            || !isset($configuration['access_token'])
+            || (isset($configuration['expires_at']) && time() > $configuration['expires_at'])
+        ) {
+            //run login if configuration does not exists
+            //if the access token does not exist
+            //or if the access token is expired
+            $command = $this->getApplication()->find('login');
+            $arguments = array(
+                'command' => 'login',
+            );
+            $input2 = new ArrayInput($arguments);
+            $returnCode = $command->run($input2, $output);
 
-        //configure common options and arguments
-        //...
+            return $returnCode;
+        }
     }
 }

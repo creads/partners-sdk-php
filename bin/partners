@@ -26,10 +26,10 @@ if (!$loaded) {
 use Symfony\Component\Console\Application;
 use Creads\Partners\Console;
 
-$configuration = new Console\Configuration();
 $application = new Application('Creads Partners API CLI', '1.0.0');
 $application->getHelperSet()->set(new Console\Helper\JsonHelper());
-$application->add(new Console\Command\LoginCommand($configuration));
-$application->add(new Console\Command\GetCommand($configuration));
-$application->add(new Console\Command\UploadCommand($configuration));
+$application->getHelperSet()->set(new Console\Helper\ConfigurationHelper());
+$application->add(new Console\Command\LoginCommand());
+$application->add(new Console\Command\GetCommand());
+$application->add(new Console\Command\UploadCommand());
 $application->run();

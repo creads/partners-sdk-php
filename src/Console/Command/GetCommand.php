@@ -5,7 +5,6 @@ namespace Creads\Partners\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Client;
 use GuzzleHttp\Psr7\Request;
@@ -42,33 +41,19 @@ class GetCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $json = $this->getHelperSet()->get('json');
+        $configuration = $this->getHelperSet()->get('configuration');
 
         $uri = ltrim($input->getArgument('URI'), '/');
         $include = $input->getOption('include', false);
         $filter = $input->getOption('filter', false);
 
-        //@todo create a command helper, will be used on several commands
-        if (!$this->configuration->exists()
-            || !isset($this->configuration['access_token'])
-            || (isset($this->configuration['expires_at']) && time() > $this->configuration['expires_at'])
-        ) {
-            //run login if configuration does not exists
-            //if the access token does not exist
-            //or if the access token is expired
-            $command = $this->getApplication()->find('login');
-            $arguments = array(
-                'command' => 'login',
-            );
-            $input2 = new ArrayInput($arguments);
-            $returnCode = $command->run($input2, $output);
-            if ($returnCode != 0) {
-                return $returnCode;
-            }
+        if (0 != $returnCode = $this->login($output)) {
+            return $returnCode;
         }
 
         //@todo create a service
-        $client = new Client(new BearerAccessToken($this->configuration['access_token']), [
-            'base_uri' => $this->configuration['api_base_uri'],
+        $client = new Client(new BearerAccessToken($configuration['access_token']), [
+            'base_uri' => $configuration['api_base_uri'],
             'http_errors' => false,
         ]);
 

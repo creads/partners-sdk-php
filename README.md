@@ -44,14 +44,12 @@ Or if you have an access token from somewhere else:
 
 ```php
 use Creads\Partners\Client;
-use Creads\Partners\OAuthAccessToken;
+use Creads\Partners\BearerAccessToken;
 
 // Here we get a token
 // $authentication = new OAuthAuthenticationToken(...);
 // $access_token = $authentication->getAccessToken();
-$client = new Client(null, [
-    'access_token' => $access_token
-]);
+$client = new Client(new BearerAccessToken($access_token));
 ```
 
 Get information about the API:
