@@ -31,4 +31,5 @@ $application = new Application('Creads Partners API CLI', '1.0.0');
 $application->getHelperSet()->set(new Console\Helper\JsonHelper());
 $application->add(new Console\Command\LoginCommand($configuration));
 $application->add(new Console\Command\GetCommand($configuration));
+$application->add(new Console\Command\UploadCommand($configuration));
 $application->run();

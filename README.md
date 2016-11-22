@@ -99,36 +99,23 @@ $client->post('projects', [
 
 Upload a file:
 
-> The API only supports JSON for now, except for file upload that requires `multipart`
-
 ```php
-$multipartBody = ;
-        $client->request(
-            'POST',
-            'files',
-            [
-                'multipart' =>
-                [
-                    [
-                        'name' => 'file',
-                        'contents' => fopen('/tmp/myfile.jpg', 'r'),
-                        'filename' => 'uploadedName.jpg',
-                    ],
-                    [
-                        'name' => 'filepath',
-                        'contents' => '/uploadedName.jpg',
-                    ],
-                    // Additionnal data joined to the file (eg. to make the file only visible to your coworkers) :
-                    [
-                        'name' => 'organization.gid',
-                        'contents' => 'my_organization_id',
-                    ],
-                ]
-            ]
-        );
+    $response = $client->postFile('/tmp/realFilePath.png', 'wantedFileName.png');
 ```
 
+> The response will expose a `Location` header containing the file url. This url is what you need to reference in a resource to which you want to link this file
 
+```php
+
+$theFileUrl = $response->getHeader('Location');
+
+$client->post('projects', [
+    // ...
+    'brief_files' => [
+        $theFileUrl
+    ]
+]);
+```
 
 ### Errors and exceptions handling
 

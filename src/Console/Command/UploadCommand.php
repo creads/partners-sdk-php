@@ -4,37 +4,27 @@ namespace Creads\Partners\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Client;
-use GuzzleHttp\Psr7\Request;
-use Flow\JSONPath\JSONPath;
 use Creads\Partners\BearerAccessToken;
 
-class GetCommand extends Command
+class UploadCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('get')
-            ->setDescription('Get a resource')
+            ->setName('upload')
+            ->setDescription('Upload a file resource')
             ->addArgument(
-              'URI',
+              'filepath',
               InputArgument::REQUIRED,
-              'URI of the resource'
+              'real file path of the file to upload'
             )
-            ->addOption(
-              'filter',
-              'f',
-              InputOption::VALUE_REQUIRED,
-              'Filter results using JSON path (http://goessner.net/articles/JsonPath)'
-            )
-            ->addOption(
-                'include',
-                'i',
-                InputOption::VALUE_NONE,
-                'Include the HTTP-header in the output'
+            ->addArgument(
+              'filename',
+              InputArgument::OPTIONAL,
+              'Desired final filename for the file to upload'
             )
         ;
     }
@@ -43,9 +33,8 @@ class GetCommand extends Command
     {
         $json = $this->getHelperSet()->get('json');
 
-        $uri = ltrim($input->getArgument('URI'), '/');
-        $include = $input->getOption('include', false);
-        $filter = $input->getOption('filter', false);
+        $realFilePath = $input->getArgument('filepath');
+        $filename = $input->getArgument('filename');
 
         //@todo create a command helper, will be used on several commands
         if (!$this->configuration->exists()
@@ -72,49 +61,19 @@ class GetCommand extends Command
             'http_errors' => false,
         ]);
 
-        $request = new Request('GET', $uri);
-        $response = $client->send($request);
-
-        //@todo use handler
-        // if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
-        //     foreach($request->getHeaders() as $name => $value) {
-        //         $output->writeln($name.': '.$value[0]);
-        //     }
-        // }
-        //
+        $response = $client->postFile($realFilePath, $filename);
 
         $error = ($response->getStatusCode() >= 400);
 
-        if ($include) {
-            $reason = $response->getStatusCode().' '.$response->getReasonPhrase();
-            $output->writeln($reason);
-        } elseif ($error) {
+        if ($error) {
             $reason = '<error>'.$response->getStatusCode().' '.$response->getReasonPhrase().'</error>';
             //for the output to stdderr to no break the output
             $output->getErrorOutput()->writeln($reason);
         }
 
-        if ($include) {
-            foreach ($response->getHeaders() as $name => $value) {
-                $output->writeln($name.': '.$value[0]);
-            }
-        }
-
         $body = (string) $response->getBody();
 
-        //@toto test content-type
-
-        $body = json_decode($body, true);
-        if (false === $body) {
-            $output->getErrorOutput()->writeln('<error>Malformed JSON body</error>');
-        } else {
-            if ($filter && !$error) {
-                $body = $json->format((new JSONPath($body))->find($filter));
-            } else {
-                $body = $json->format($body);
-            }
-        }
-
+        $output->writeln(sprintf('Location: %s', $response->getHeader('Location')[0]));
         $output->writeln($body);
 
         return ($error) ? $response->getStatusCode() : 0;
