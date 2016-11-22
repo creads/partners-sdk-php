@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Client;
 use GuzzleHttp\Psr7\Request;
 use Flow\JSONPath\JSONPath;
+use Creads\Partners\BearerAccessToken;
 
 class GetCommand extends Command
 {
@@ -66,10 +67,7 @@ class GetCommand extends Command
         }
 
         //@todo create a service
-        $client = new Client(null, [
-            'headers' => [
-                'Authorization' => 'Bearer '.$this->configuration['access_token'],
-            ],
+        $client = new Client(new BearerAccessToken($this->configuration['access_token']), [
             'base_uri' => $this->configuration['api_base_uri'],
             'http_errors' => false,
         ]);

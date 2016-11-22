@@ -4,27 +4,26 @@ namespace Creads\Partners\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Creads\Partners\Client;
+use Creads\Partners\BearerAccessToken;
 
-class UploadFileCommand extends Command
+class UploadCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('upload-file')
+            ->setName('upload')
             ->setDescription('Upload a file resource')
             ->addArgument(
               'filepath',
               InputArgument::REQUIRED,
               'real file path of the file to upload'
             )
-            ->addOption(
+            ->addArgument(
               'filename',
-              'f',
-              InputOption::VALUE_OPTIONAL,
+              InputArgument::OPTIONAL,
               'Desired final filename for the file to upload'
             )
         ;
@@ -35,7 +34,7 @@ class UploadFileCommand extends Command
         $json = $this->getHelperSet()->get('json');
 
         $realFilePath = $input->getArgument('filepath');
-        $filename = $input->getOption('filename');
+        $filename = $input->getArgument('filename');
 
         //@todo create a command helper, will be used on several commands
         if (!$this->configuration->exists()
@@ -57,10 +56,7 @@ class UploadFileCommand extends Command
         }
 
         //@todo create a service
-        $client = new Client(null, [
-            'headers' => [
-                'Authorization' => 'Bearer '.$this->configuration['access_token'],
-            ],
+        $client = new Client(new BearerAccessToken($this->configuration['access_token']), [
             'base_uri' => $this->configuration['api_base_uri'],
             'http_errors' => false,
         ]);

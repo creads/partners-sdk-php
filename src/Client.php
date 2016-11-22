@@ -27,7 +27,7 @@ class Client extends GuzzleClient
      * Constructor
      * {@inheritdoc}
      */
-    public function __construct(AuthenticationInterface $authentication = null, array $config = [])
+    public function __construct(AuthenticationInterface $authentication, array $config = [])
     {
         $config = array_merge($this->getDefaultClientConfig(), $config);
 
