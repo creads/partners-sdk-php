@@ -6,8 +6,6 @@ use GuzzleHttp\Client as GuzzleClient;
 
 class Client extends GuzzleClient
 {
-    const FILE_SIGNATURE_EXPIRATION = 600; // 10 minutes in seconds
-
     /**
      * The API format to send/recieve : json, xml...
      *
@@ -16,12 +14,11 @@ class Client extends GuzzleClient
     protected $format = 'json';
 
     /**
-     * If fetched, the user's info from the API
-     * Useful for fileuploads.
+     * If fetched, the user's data needed to upload files.
      *
      * @var array|null
      */
-    protected $me = null;
+    protected $uploadForm = null;
 
     /**
      * Constructor
@@ -86,14 +83,14 @@ class Client extends GuzzleClient
             $destinationFilepath = pathinfo($sourceFilepath)['basename'];
         }
 
-        $me = $this->getMe();
-        $uploadUrl = $me['upload_form']['form_attributes']['action'];
+        $uploadForm = $this->getUploadForm();
+        $uploadUrl = $uploadForm['form_attributes']['action'];
         $uploadUrl = str_replace('${filename}', $destinationFilepath, $uploadUrl);
 
         $multipartBody = [];
 
         // Add Amazon specific data needed for authentication (order matters)
-        foreach ($me['upload_form']['form_inputs'] as $key => $value) {
+        foreach ($uploadForm['form_inputs'] as $key => $value) {
             if ($key === 'key') {
                 $value = str_replace('${filename}', $destinationFilepath, $value);
             }
@@ -121,39 +118,26 @@ class Client extends GuzzleClient
         );
     }
 
-    protected function getMe()
+    protected function getUploadForm()
     {
-        // If previous /me calls is not expired yet
-        // use the signature info already fetched
-        // If not, fetch new credentials
-        if (
-            $this->me &&
-            isset($this->me['upload_form']['form_inputs']) &&
-            isset($this->me['upload_form']['form_inputs']) &&
-            isset($this->me['upload_form']['form_inputs']['X-Amz-Date'])
-           ) {
-            $expireAt = new \DateTime($this->me['upload_form']['form_inputs']['X-Amz-Date']);
-            $expireAt->modify(sprintf('+ %s sec', self::FILE_SIGNATURE_EXPIRATION));
-            $now = new \DateTime();
+        if ($this->uploadForm) {
+            // If previous upload form is not expired yet
+            // use data already fetched
+            // If not, fetch new upload form
+            $expireAt = new \DateTime($this->uploadForm['expires_at'], new \DateTimeZone('UTC'));
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
             if ($now <= $expireAt) {
-                return $this->me;
+                return $this->uploadForm;
             }
         }
-        $this->me = $this->get('me');
 
-        return $this->me;
+        $me = $this->get('me');
+        if (!isset($me['upload_form'])) {
+            throw new \Exception('You are not allowed to upload files');
+        }
+
+        $this->uploadForm = $me['upload_form'];
+
+        return $this->uploadForm;
     }
-
-    // /**
-    //  * Returns options to apply every request
-    //  * @return array
-    //  */
-    // protected function getRequestOptions()
-    // {
-    //     return [
-    //         'headers' => [
-    //             'Authorization' => 'Bearer ' . $this->getConfig('access_token')
-    //         ]
-    //     ];
-    // }
 }
