@@ -20,9 +20,9 @@ abstract class Command extends BaseCommand
             //if the access token does not exist
             //or if the access token is expired
             $command = $this->getApplication()->find('login');
-            $arguments = array(
+            $arguments = [
                 'command' => 'login',
-            );
+            ];
             $input2 = new ArrayInput($arguments);
             $returnCode = $command->run($input2, $output);
 

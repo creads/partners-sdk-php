@@ -2,8 +2,8 @@
 
 namespace Creads\Partners\Console\Helper;
 
-use Symfony\Component\Console\Helper\Helper;
 use Creads\Partners\Console\Configuration;
+use Symfony\Component\Console\Helper\Helper;
 
 class ConfigurationHelper extends Helper implements \ArrayAccess
 {
@@ -50,7 +50,7 @@ class ConfigurationHelper extends Helper implements \ArrayAccess
     {
         return [
             'connect_base_uri' => 'https://connect-preprod.creads-partners.com/',
-            'api_base_uri' => 'https://api-preprod.creads-partners.com/v1/',
+            'api_base_uri'     => 'https://api-preprod.creads-partners.com/v1/',
         ];
     }
 

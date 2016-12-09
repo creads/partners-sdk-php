@@ -2,10 +2,10 @@
 
 namespace Creads\Partners\Console\Command;
 
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Question\Question;
 
 class LoginCommand extends Command
@@ -35,8 +35,7 @@ class LoginCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Use a given OAuth2 grant type (default: password)'
-            )
-        ;
+            );
     }
 
     /**
@@ -108,7 +107,7 @@ class LoginCommand extends Command
         //build form params
         $params = [
             'grant_type' => $configuration['grant_type'],
-            'scope' => 'base',
+            'scope'      => 'base',
         ];
         if ('password' === $configuration['grant_type']) {
             if (!isset($configuration['password'])) {
@@ -140,7 +139,7 @@ class LoginCommand extends Command
         $client = new \GuzzleHttp\Client(['base_uri' => $configuration['connect_base_uri']]);
         try {
             $response = $client->post('/oauth2/token', [
-                'auth' => [$configuration['client_id'], $configuration['client_secret']],
+                'auth'        => [$configuration['client_id'], $configuration['client_secret']],
                 'form_params' => $params,
             ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
