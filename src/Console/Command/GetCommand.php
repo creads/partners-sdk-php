@@ -2,14 +2,14 @@
 
 namespace Creads\Partners\Console\Command;
 
+use Creads\Partners\BearerAccessToken;
+use Creads\Partners\Client;
+use Flow\JSONPath\JSONPath;
+use GuzzleHttp\Psr7\Request;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Creads\Partners\Client;
-use GuzzleHttp\Psr7\Request;
-use Flow\JSONPath\JSONPath;
-use Creads\Partners\BearerAccessToken;
 
 class GetCommand extends Command
 {
@@ -34,8 +34,7 @@ class GetCommand extends Command
                 'i',
                 InputOption::VALUE_NONE,
                 'Include the HTTP-header in the output'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -53,7 +52,7 @@ class GetCommand extends Command
 
         //@todo create a service
         $client = new Client(new BearerAccessToken($configuration['access_token']), [
-            'base_uri' => $configuration['api_base_uri'],
+            'base_uri'    => $configuration['api_base_uri'],
             'http_errors' => false,
         ]);
 

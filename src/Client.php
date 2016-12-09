@@ -95,14 +95,14 @@ class Client extends GuzzleClient
                 $value = str_replace('${filename}', $destinationFilepath, $value);
             }
             $multipartBody[] = [
-                'name' => $key,
+                'name'     => $key,
                 'contents' => $value,
             ];
         }
 
         // Build the multipart file upload (order matters)
         $multipartBody[] = [
-            'name' => 'file',
+            'name'     => 'file',
             'contents' => fopen($sourceFilepath, 'rb'),
         ];
 

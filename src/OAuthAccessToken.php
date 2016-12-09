@@ -52,29 +52,29 @@ class OAuthAccessToken implements AuthenticationInterface
         if ($noStoring || $this->isTokenExpired()) {
             $multipartBody = [
                 [
-                    'name' => 'client_id',
+                    'name'     => 'client_id',
                     'contents' => $this->clientId,
                 ],
                 [
-                    'name' => 'client_secret',
+                    'name'     => 'client_secret',
                     'contents' => $this->clientSecret,
                 ],
                 [
-                    'name' => 'grant_type',
+                    'name'     => 'grant_type',
                     'contents' => isset($this->params['grant_type']) ? $this->params['grant_type'] : 'client_credentials',
                 ],
                 [
-                    'name' => 'scope',
+                    'name'     => 'scope',
                     'contents' => $scope,
                 ],
             ];
             if (isset($this->params['grant_type']) && $this->params['grant_type'] === 'password') {
                 $multipartBody[] = [
-                    'name' => 'username',
+                    'name'     => 'username',
                     'contents' => $this->params['username'],
                 ];
                 $multipartBody[] = [
-                    'name' => 'password',
+                    'name'     => 'password',
                     'contents' => $this->params['password'],
                 ];
             }
