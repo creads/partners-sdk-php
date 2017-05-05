@@ -76,6 +76,33 @@ class Client extends GuzzleClient
         return $parsedResponse;
     }
 
+    /**
+     * Download remote file and store it locally.
+     *
+     * @param string $remoteUrl
+     * @param string $destination
+     */
+    public function downloadFile($remoteUrl, $destination)
+    {
+        $resource = @fopen($destination, 'w+');
+        if (false === $resource) {
+            throw new \RuntimeException(sprintf('Can not open file for writing %s', $destination));
+        }
+
+        $this->request(
+            'GET',
+            $remoteUrl,
+            [
+                'sink' => $resource,
+                'headers' => [
+                    'Authorization' => null,
+                ],
+            ]
+        );
+
+        @fclose($resource);
+    }
+
     public function postFile($sourceFilepath, $destinationFilepath = null)
     {
         if (!$destinationFilepath) {
