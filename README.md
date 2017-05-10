@@ -121,6 +121,12 @@ $client->post('projects', [
 ]);
 ```
 
+Download a file:
+
+```php
+    $client->downloadFile('https://distant-host.com/somefile.png', '/tmp/wantedFilePath.png');
+```
+
 ### Errors and exceptions handling
 
 When HTTP errors occurs (4xx and 5xx responses) , the library throws a `GuzzleHttp\Exception\ClientException` object:
