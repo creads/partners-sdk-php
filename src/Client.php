@@ -76,6 +76,19 @@ class Client extends GuzzleClient
         return $parsedResponse;
     }
 
+    public function delete($uri)
+    {
+        $response = parent::delete($uri);
+        switch ($this->format) {
+            case 'json':
+            default:
+                $parsedResponse = json_decode($response->getBody(), true);
+                break;
+        }
+
+        return $parsedResponse;
+    }
+
     /**
      * Download remote file and store it locally.
      *
@@ -122,14 +135,14 @@ class Client extends GuzzleClient
                 $value = str_replace('${filename}', $destinationFilepath, $value);
             }
             $multipartBody[] = [
-                'name'     => $key,
+                'name' => $key,
                 'contents' => $value,
             ];
         }
 
         // Build the multipart file upload (order matters)
         $multipartBody[] = [
-            'name'     => 'file',
+            'name' => 'file',
             'contents' => fopen($sourceFilepath, 'rb'),
         ];
 
