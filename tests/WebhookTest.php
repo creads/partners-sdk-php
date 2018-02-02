@@ -15,7 +15,6 @@ final class WebhookTest extends TestCase
     public function testValidSignatureIsValid()
     {
         $webhook = new Webhook('my_secret');
-
         $signature = hash_hmac('sha256', '{}', 'my_secret');
 
         $this->assertTrue($webhook->isSignatureValid($signature, '{}'));
