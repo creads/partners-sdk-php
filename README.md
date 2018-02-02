@@ -3,7 +3,7 @@ creads/partners-api
 
 A simple PHP client and CLI for Creads Partners API.
 
-We recomend to read the [Full API Documentation](https://creads.github.io/partners-doc/) first.
+We recommend to read the [Full API Documentation](https://creads.github.io/partners-doc/) first.
 
 |        Style-CI         |        Downloads        |         Release         |
 |:-----------------------:|:-----------------------:|:-----------------------:|
