@@ -160,6 +160,18 @@ if (404 == $e->getResponse()->getStatusCode()) {
 }
 ```
 
+## Webhooks
+
+You can check the validity of a webhook signature easily:
+
+```php
+$webhook = new Webhook('your_secret');
+
+if (!$webhook->isSignatureValid($receivedSignature, $receivedJsonBody)) {
+    throw new Exception('...');
+}
+```
+
 ## Use the CLI application
 
 ### Installation
