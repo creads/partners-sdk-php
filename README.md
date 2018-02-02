@@ -3,6 +3,8 @@ creads/partners-api
 
 A simple PHP client and CLI for Creads Partners API.
 
+We recommend to read the [Full API Documentation](https://creads.github.io/partners-doc/) first.
+
 |        Build Status     |        Style-CI         |        Downloads        |         Release         |
 |:-----------------------:|:-----------------------:|:-----------------------:|:-----------------------:|
 | [![Build Status](https://travis-ci.org/creads/partners-sdk-php.svg?branch=master)](https://travis-ci.org/creads/partners-sdk-php) | [![Style CI](https://styleci.io/repos/41876466/shield)](https://styleci.io/repos/41876466) | [![Total Downloads](https://poser.pugx.org/creads/partners-api/downloads)](https://packagist.org/packages/creads/partners-api) | [![Latest Unstable Version](https://poser.pugx.org/creads/partners-api/v/unstable)](https://packagist.org/packages/creads/partners-api) |
