@@ -107,9 +107,6 @@ class Client extends GuzzleClient
             $remoteUrl,
             [
                 'sink' => $resource,
-                'headers' => [
-                    'Authorization' => null,
-                ],
             ]
         );
 
