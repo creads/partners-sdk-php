@@ -43,8 +43,6 @@ class LoginCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $configuration = $this->getHelperSet()->get('configuration');
-
         //for the output to stdderr to no break the output
         $output = $output->getErrorOutput();
 
@@ -58,6 +56,7 @@ class LoginCommand extends Command
         $type = $input->getOption('grant-type', null);
         $savePassword = $input->getOption('save-password', false);
 
+        $configuration = $this->getHelperSet()->get('configuration');
         if (!$configuration->exists()) {
             $configuration['grant_type'] = $type ? $type : 'password';
         } elseif ($type && $configuration['grant_type'] !== $type) {

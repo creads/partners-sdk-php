@@ -29,9 +29,6 @@ class UploadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $json = $this->getHelperSet()->get('json');
-        $configuration = $this->getHelperSet()->get('configuration');
-
         $source = $input->getArgument('source');
         $destination = $input->getArgument('destination');
 
@@ -39,11 +36,7 @@ class UploadCommand extends Command
             return $returnCode;
         }
 
-        //@todo create a service
-        $client = new Client(new BearerAccessToken($configuration['access_token']), [
-            'base_uri'    => $configuration['api_base_uri'],
-            'http_errors' => false,
-        ]);
+        $client = ClientFactory::create($this->getHelperSet()->get('configuration'));
 
         $response = $client->postFile($source, $destination);
 
