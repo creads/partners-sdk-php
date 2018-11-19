@@ -23,8 +23,8 @@ if (!$loaded) {
     exit(1);
 }
 
-use Symfony\Component\Console\Application;
 use Creads\Partners\Console;
+use Symfony\Component\Console\Application;
 
 $application = new Application('Creads Partners API CLI', '1.0.0');
 $application->getHelperSet()->set(new Console\Helper\JsonHelper());
@@ -32,4 +32,5 @@ $application->getHelperSet()->set(new Console\Helper\ConfigurationHelper());
 $application->add(new Console\Command\LoginCommand());
 $application->add(new Console\Command\GetCommand());
 $application->add(new Console\Command\UploadCommand());
+$application->add(new Console\Command\SignedAuthUrlCommand());
 $application->run();
