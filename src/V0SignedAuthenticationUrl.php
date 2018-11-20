@@ -47,7 +47,6 @@ class V0SignedAuthenticationUrl extends SignedAuthenticationUrl
                 if (is_int($key)) {
                     unset($matches[$key]);
                 } else {
-                    var_dump($key);
                     $matches[$key] = base64_decode($value);
                 }
 
