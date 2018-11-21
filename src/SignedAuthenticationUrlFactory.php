@@ -42,7 +42,7 @@ class SignedAuthenticationUrlFactory
             throw new \InvalidArgumentException('Missing "client_secret" parameter in configuration');
         }
 
-        if ( self::RFC0_SIGNATURE_PROTOCOL == $protocol) {
+        if (self::RFC0_SIGNATURE_PROTOCOL == $protocol) {
             $signedUrl = new V0SignedAuthenticationUrl();
         } else {
             $signedUrl = new SignedAuthenticationUrl();
@@ -56,7 +56,7 @@ class SignedAuthenticationUrlFactory
         );
     }
 
-    static public function getAvailableProtocoles()
+    static public function getAvailableProtocols()
     {
         return [
             self::RFC0_SIGNATURE_PROTOCOL,

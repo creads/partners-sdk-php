@@ -43,7 +43,7 @@ class GetCommand extends Command
         $include = $input->getOption('include', false);
         $filter = $input->getOption('filter', false);
 
-        if (0 != $returnCode = $this->login($output)) {
+        if (0 != ($returnCode = $this->login($output))) {
             return $returnCode;
         }
 

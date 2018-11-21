@@ -32,7 +32,7 @@ class UploadCommand extends Command
         $source = $input->getArgument('source');
         $destination = $input->getArgument('destination');
 
-        if (0 != $returnCode = $this->login($output)) {
+        if (0 != ($returnCode = $this->login($output))) {
             return $returnCode;
         }
 

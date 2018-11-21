@@ -11,7 +11,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidate()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/ai5kb2VAY3JlYWRzLm9yZw==/TXkgT3JnYW5pemF0aW9u?expires=20181119T184807Z&signature=27fff830f92c063bff89dbf34636e2bf594b12310402d92fb4c3ce5babe487ec&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/TXkgT3JnYW5pemF0aW9u/ai5kb2VAY3JlYWRzLm9yZw==?expires=20181121T124553Z&signature=d15d9d79c0c978ddda51293cbf229d8b04e9fa44037641cc0b33e31e84c64ed7&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);
@@ -21,7 +21,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidateWithNoQueryParameters()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/ai5kb2VAY3JlYWRzLm9yZw==/TXkgT3JnYW5pemF0aW9u';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/TXkgT3JnYW5pemF0aW9u/ai5kb2VAY3JlYWRzLm9yZw==';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);
@@ -41,7 +41,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidateWithHackedSignature()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/ai5kb2VAY3JlYWRzLm9yZw==/TXkgT3JnYW5pemF0aW9u?expires=20181119T184807Z&signature=f7fff830f92c063bff89dbf34636e2bf594b12310402d92fb4c3ce5babe487ec&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/TXkgT3JnYW5pemF0aW9u/ai5kb2VAY3JlYWRzLm9yZw==?expires=20181121T124553Z&signature=e15d9d79c0c978ddda51293cbf229d8b04e9fa44037641cc0b33e31e84c64ed7&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);
@@ -52,7 +52,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidateWithHackedOrganizationName()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/fi5kb2VAY3JlYWRzLm9yZw==/TXkgT3JnYW5pemF0aW9u?expires=20181119T184807Z&signature=27fff830f92c063bff89dbf34636e2bf594b12310402d92fb4c3ce5babe487ec&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/TXkgT3JnYW5pemF0aW9u/fi5kb2VAY3JlYWRzLm9yZw==?expires=20181121T124553ZZ&signature=d15d9d79c0c978ddda51293cbf229d8b04e9fa44037641cc0b33e31e84c64ed7&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);
@@ -62,7 +62,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidateWithHackedEmail()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/ai5kb2VAY3JlYWRzLm9yZw==/XXkgT3JnYW5pemF0aW9u?expires=20181119T184807Z&signature=27fff830f92c063bff89dbf34636e2bf594b12310402d92fb4c3ce5babe487ec&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/XXkgT3JnYW5pemF0aW9u/ai5kb2VAY3JlYWRzLm9yZw==?expires=20181121T124553ZZ&signature=d15d9d79c0c978ddda51293cbf229d8b04e9fa44037641cc0b33e31e84c64ed7&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);
@@ -72,7 +72,7 @@ final class V0SignedAuthenticationUrlTest extends TestCase
 
     public function testValidateWithHackedExpires()
     {
-        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/ai5kb2VAY3JlYWRzLm9yZw==/TXkgT3JnYW5pemF0aW9u?expires=20191119T184807Z&signature=27fff830f92c063bff89dbf34636e2bf594b12310402d92fb4c3ce5babe487ec&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
+        $signedUrl = 'http://127.0.0.1:8000/v1/signed-auth/TXkgT3JnYW5pemF0aW9u/ai5kb2VAY3JlYWRzLm9yZw==?expires=20191119T184807Z&signature=d15d9d79c0c978ddda51293cbf229d8b04e9fa44037641cc0b33e31e84c64ed7&accessKeyId=15_64d081gwqckkwwkc0s0occ4ckss8ww04o4ow80k0444kkkg4g0';
         $secretKey = '27ldyvaorh34coc00kggkogscgwc8s84go8ck8wks4ogsgg8kk';
 
         $result = (new V0SignedAuthenticationUrl())->validate($secretKey, $signedUrl);

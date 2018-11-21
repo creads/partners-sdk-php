@@ -14,7 +14,6 @@ class ClientFactory
             throw new \InvalidArgumentException('Missing "api_base_uri" parameter in configuration');
         }
 
-        //@todo create a service
         return new Client(new BearerAccessToken($configuration['access_token']), [
             'base_uri'    => $configuration['api_base_uri'],
             'http_errors' => false,

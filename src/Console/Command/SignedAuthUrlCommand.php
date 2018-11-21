@@ -20,10 +20,10 @@ class SignedAuthUrlCommand extends Command
             ->setName('signed-auth-url')
             ->setDescription('Generate a signed auth URL')
             ->addArgument(
-                'email',
+                'organizationName',
                 InputArgument::REQUIRED
             )->addArgument(
-                'organizationName',
+                'email',
                 InputArgument::REQUIRED
             )->addArgument(
                 'organizationRid',
@@ -49,7 +49,7 @@ class SignedAuthUrlCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (0 != $returnCode = $this->login($output)) {
+        if (0 != ($returnCode = $this->login($output))) {
             return $returnCode;
         }
 
@@ -57,7 +57,7 @@ class SignedAuthUrlCommand extends Command
 
         $protocol = $input->getOption('protocol');
 
-        if (!in_array($protocol, SignedAuthenticationUrlFactory::getAvailableProtocoles())) {
+        if (!in_array($protocol, SignedAuthenticationUrlFactory::getAvailableProtocols())) {
             throw new \RuntimeException('Invalid value for protocol');
         }
 

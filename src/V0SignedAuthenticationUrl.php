@@ -7,7 +7,7 @@ namespace Creads\Partners;
  */
 class V0SignedAuthenticationUrl extends SignedAuthenticationUrl
 {
-    public function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
+    protected function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
     {
         $dateKey = hash_hmac('sha256', $iso8601Expires, $secretKey);
         $organizationKey = hash_hmac('sha256', $parameters['organizationName'], $dateKey);
@@ -49,7 +49,6 @@ class V0SignedAuthenticationUrl extends SignedAuthenticationUrl
                 } else {
                     $matches[$key] = base64_decode($value);
                 }
-
             }
         };
 

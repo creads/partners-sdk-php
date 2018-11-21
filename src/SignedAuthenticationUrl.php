@@ -27,7 +27,7 @@ class SignedAuthenticationUrl
         return $encodedUri . '?' . $query;
     }
 
-    public function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
+    protected function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
     {
         $dateKey = hash_hmac('sha256', $iso8601Expires, $secretKey);
         $signature = hash_hmac('sha256', $encodedUri, $dateKey);
