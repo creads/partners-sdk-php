@@ -7,7 +7,7 @@ We recommend to read the [Full API Documentation](https://creads.github.io/partn
 
 |        Build Status     |      Code Climate       |        Downloads        |         Release         |
 |:-----------------------:|:-----------------------:|:-----------------------:|:-----------------------:|
-| [![Build Status](https://travis-ci.org/creads/partners-sdk-php.svg?branch=master)](https://travis-ci.org/creads/partners-sdk-php) | [![Maintainability](https://api.codeclimate.com/v1/badges/50adf87f6262999b92e1/maintainability)](https://codeclimate.com/github/creads/partners-sdk-php/maintainability) | [![Total Downloads](https://poser.pugx.org/creads/partners-api/downloads)](https://packagist.org/packages/creads/partners-api) | [![Latest Unstable Version](https://poser.pugx.org/creads/partners-api/v/unstable)](https://packagist.org/packages/creads/partners-api) |
+| [![Build Status](https://travis-ci.com/creads/partners-sdk-php.svg?branch=master)](https://travis-ci.org/creads/partners-sdk-php) | [![Maintainability](https://api.codeclimate.com/v1/badges/50adf87f6262999b92e1/maintainability)](https://codeclimate.com/github/creads/partners-sdk-php/maintainability) | [![Total Downloads](https://poser.pugx.org/creads/partners-api/downloads)](https://packagist.org/packages/creads/partners-api) | [![Latest Unstable Version](https://poser.pugx.org/creads/partners-api/v/unstable)](https://packagist.org/packages/creads/partners-api) |
 
 [![Pingdom Status](https://share.pingdom.com/banners/3ced7530)](http://stats.pingdom.com/hi1jra1p2bc6/2161667)
 
