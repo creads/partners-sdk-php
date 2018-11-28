@@ -3,7 +3,7 @@
 namespace Creads\Partners\Console\Command;
 
 use Creads\Partners\BearerAccessToken;
-use Creads\Partners\Client;
+use Creads\Partners\ClientFactory;
 use Flow\JSONPath\JSONPath;
 use GuzzleHttp\Psr7\Request;
 use Symfony\Component\Console\Input\InputArgument;
@@ -39,22 +39,15 @@ class GetCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $json = $this->getHelperSet()->get('json');
-        $configuration = $this->getHelperSet()->get('configuration');
-
         $uri = ltrim($input->getArgument('URI'), '/');
         $include = $input->getOption('include', false);
         $filter = $input->getOption('filter', false);
 
-        if (0 != $returnCode = $this->login($output)) {
+        if (0 != ($returnCode = $this->login($output))) {
             return $returnCode;
         }
 
-        //@todo create a service
-        $client = new Client(new BearerAccessToken($configuration['access_token']), [
-            'base_uri'    => $configuration['api_base_uri'],
-            'http_errors' => false,
-        ]);
+        $client = ClientFactory::create($this->getHelperSet()->get('configuration'));
 
         $request = new Request('GET', $uri);
         $response = $client->send($request);
@@ -92,6 +85,8 @@ class GetCommand extends Command
         if (false === $body) {
             $output->getErrorOutput()->writeln('<error>Malformed JSON body</error>');
         } else {
+
+            $json = $this->getHelperSet()->get('json');
             if ($filter && !$error) {
                 $body = $json->format((new JSONPath($body))->find($filter));
             } else {
