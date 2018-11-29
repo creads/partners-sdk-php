@@ -2,7 +2,6 @@
 
 namespace Creads\Partners\Console\Command;
 
-use Creads\Partners\ClientFactory;
 use Creads\Partners\SignedAuthenticationUrlFactory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -40,7 +39,22 @@ class SignedAuthUrlCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'Set protocol to another version than default',
                 SignedAuthenticationUrlFactory::RFC1_SIGNATURE_PROTOCOL
-            );
+            )->addOption(
+                'api-base-uri',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set api base URI than default'
+            )->addOption(
+                'client_id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set client ID than default'
+            )->addOption(
+                'client-secret',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set client secret than default'
+            )
         ;
     }
 
@@ -75,5 +89,4 @@ class SignedAuthUrlCommand extends Command
 
         $output->writeln(sprintf('<comment>%s</comment>', $signedUrl));
     }
-
 }
