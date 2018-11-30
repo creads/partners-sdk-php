@@ -45,7 +45,7 @@ class SignedAuthUrlCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'Set api base URI than default'
             )->addOption(
-                'client_id',
+                'client-id',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Set client ID than default'
@@ -70,9 +70,23 @@ class SignedAuthUrlCommand extends Command
         $configuration = $this->getHelperSet()->get('configuration');
 
         $protocol = $input->getOption('protocol');
+        $api_base_uri = $input->getOption('api-base-uri');
+        $client_id = $input->getOption('client-id');
+        $client_secret = $input->getOption('client-secret');
 
-        if (!in_array($protocol, SignedAuthenticationUrlFactory::getAvailableProtocols())) {
+        if (($client_id && !$client_secret) || (!$client_id && $client_secret)) {
+            throw new \RuntimeException('Options --client-id & --client-secret have to be set together');
+        } elseif (!in_array($protocol, SignedAuthenticationUrlFactory::getAvailableProtocols())) {
             throw new \RuntimeException('Invalid value for protocol');
+        }
+
+        if ($api_base_uri) {
+            $configuration['api_base_uri'] = $api_base_uri;
+        }
+
+        if ($client_id && $client_secret) {
+            $configuration['client_id'] = $client_id;
+            $configuration['client_secret'] = $client_secret;
         }
 
         $signedUrl = SignedAuthenticationUrlFactory::create(
