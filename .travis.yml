@@ -1,6 +1,8 @@
 language: php
 
 php:
+  - 5.5
+  - 5.6
   - 7.0
   - 7.1
   - 7.2
@@ -8,7 +10,10 @@ php:
 
 matrix:
   allow_failures:
-    - php: 7.1
+    - php: 5.5
+    - php: 5.6
+    - php: 7.0
+    - php: nightly
 
 install:
   - composer install -n --no-progress
