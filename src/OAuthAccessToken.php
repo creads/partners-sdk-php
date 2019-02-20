@@ -106,13 +106,7 @@ class OAuthAccessToken implements AuthenticationInterface
 
     protected function isTokenExpired()
     {
-        $stat = false;
-
-        if (file_exists($this->getTokenFilePath())) {
-            $stat = @stat($this->getTokenFilePath());
-        }
-
-        if (!$stat) {
+        if (!file_exists($this->getTokenFilePath())) {
             return true;
         }
 

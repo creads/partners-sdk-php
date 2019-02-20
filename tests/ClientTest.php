@@ -20,13 +20,13 @@ class ClientTest extends TestCase
         ;
     }
 
-    public function testValidate()
+    public function testConstruct()
     {
         $this->authentication
-            ->expects($this->never())
+            ->expects($this->once())
             ->method('getConfig')
         ;
+
         $client = new Client($this->authentication, []);
-        $config = $client->getConfig();
     }
 }
