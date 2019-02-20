@@ -21,16 +21,19 @@ class Client extends GuzzleClient
     protected $uploadForm = null;
 
     /**
+     * @var AuthenticationInterface
+     */
+    protected $authentication;
+
+    /**
      * Constructor
      * {@inheritdoc}
      */
     public function __construct(AuthenticationInterface $authentication, array $config = [])
     {
         $config = array_merge($this->getDefaultClientConfig(), $config);
+        $this->authentication = $authentication;
 
-        if ($authentication) {
-            $config = array_merge($config, $authentication->getConfig());
-        }
         if (!empty($config['format']) && in_array($config['format'], ['json'])) {
             $this->format = $config['format'];
         }
@@ -153,6 +156,15 @@ class Client extends GuzzleClient
                 'multipart' => $multipartBody,
             ]
         );
+    }
+
+    public function request($method, $uri = '', array $options = [])
+    {
+        if (!array_key_exists('headers', $options) || !array_key_exists('Authorization', $options['headers'])) {
+            $options = array_merge($options, $this->authentication->getConfig());
+        }
+
+        return parent::request($method, $uri, $options);
     }
 
     protected function getUploadForm()
