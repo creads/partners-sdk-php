@@ -18,11 +18,6 @@
     "autoload": {
         "psr-4": { "Creads\\Partners\\": "src/" }
     },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.1.x-dev"
-        }
-    },
     "require-dev": {
         "phpunit/phpunit": "^4.8"
     }
