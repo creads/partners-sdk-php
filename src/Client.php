@@ -26,11 +26,8 @@ class Client extends GuzzleClient
      */
     public function __construct(AuthenticationInterface $authentication, array $config = [])
     {
-        $config = array_merge($this->getDefaultClientConfig(), $config);
+        $config = array_merge($this->getDefaultClientConfig(), $config, $authentication->getConfig());
 
-        if ($authentication) {
-            $config = array_merge($config, $authentication->getConfig());
-        }
         if (!empty($config['format']) && in_array($config['format'], ['json'])) {
             $this->format = $config['format'];
         }
