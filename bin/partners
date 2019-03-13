@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+$locations = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+$loaded = false;
+foreach ($locations as $location) {
+    if (is_file($location)) {
+        require_once($location);
+        $loaded = true;
+    }
+}
+
+if (!$loaded) {
+    fwrite(STDERR,
+        'You must set up the project dependencies, run the following commands:' . PHP_EOL .
+        'curl -s http://getcomposer.org/installer | php' . PHP_EOL .
+        'php composer.phar install' . PHP_EOL
+    );
+    exit(1);
+}
+
+use Creads\Partners\Console;
+use Symfony\Component\Console\Application;
+
+$application = new Application('Creads Partners API CLI', '1.0.0');
+$application->getHelperSet()->set(new Console\Helper\JsonHelper());
+$application->getHelperSet()->set(new Console\Helper\ConfigurationHelper());
+$application->add(new Console\Command\LoginCommand());
+$application->add(new Console\Command\GetCommand());
+$application->add(new Console\Command\UploadCommand());
+$application->add(new Console\Command\SignedAuthUrlCommand());
+$application->run();
