@@ -36,5 +36,6 @@
             "dev-develop": "2.x-dev",
             "dev-master": "2.x-dev"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }
