@@ -110,14 +110,14 @@ class Client extends GuzzleClient
         @fclose($resource);
     }
 
-    public function postFile($sourceFilepath, $destinationFilepath = null)
+    public function postFile($sourceFilepath, $destinationFilepath = null, $enforceUnicity = false)
     {
         if (!$destinationFilepath) {
             // No specified filename, use the uploaded one
             $destinationFilepath = pathinfo($sourceFilepath)['basename'];
         }
 
-        $uploadForm = $this->getUploadForm();
+        $uploadForm = $this->getUploadForm($enforceUnicity);
         $uploadUrl = $uploadForm['form_attributes']['action'];
         $uploadUrl = str_replace('${filename}', $destinationFilepath, $uploadUrl);
 
@@ -152,9 +152,9 @@ class Client extends GuzzleClient
         );
     }
 
-    protected function getUploadForm()
+    protected function getUploadForm($ignoreCache = false)
     {
-        if ($this->uploadForm) {
+        if ($this->uploadForm && !$ignoreCache) {
             // If previous upload form is not expired yet
             // use data already fetched
             // If not, fetch new upload form
@@ -165,7 +165,7 @@ class Client extends GuzzleClient
             }
         }
 
-        $me = $this->get('me');
+        $me = $this->get('me?fields=upload_form');
         if (!isset($me['upload_form'])) {
             throw new \Exception('You are not allowed to upload files');
         }
