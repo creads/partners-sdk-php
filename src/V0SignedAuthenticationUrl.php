@@ -7,6 +7,19 @@ namespace Creads\Partners;
  */
 class V0SignedAuthenticationUrl extends SignedAuthenticationUrl
 {
+    protected function buildQuery(
+        string $iso8601Expires,
+        string $signature,
+        string $accessKey,
+        array $parameters
+    ) {
+        return http_build_query([
+            'expires' => $iso8601Expires,
+            'signature' => $signature,
+            'accessKeyId' => $accessKey,
+        ]);
+    }
+
     protected function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
     {
         $dateKey = hash_hmac('sha256', $iso8601Expires, $secretKey);

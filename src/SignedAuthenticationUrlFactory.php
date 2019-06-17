@@ -5,30 +5,37 @@ namespace Creads\Partners;
 class SignedAuthenticationUrlFactory
 {
     const RFC0_SIGNATURE_PROTOCOL = 0;
-    const RFC1_SIGNATURE_PROTOCOL = 1;
+    const RFC2_SIGNATURE_PROTOCOL = 2;
 
     /**
      * Create a signed authentication URL.
      *
-     * @param \ArrayAccess $configuration   An array of following required parameters:
-     *      [
-     *          "api_base_uri" => "https://api.creads-partners.com/v1/"
-     *          "client_id" => "N_XXX"
-     *          "client_secret" => "XXX"
-     *      ]
-     * @param string $organizationRid       Remote ID matching the regular expression: [a-zA-Z0-9\-\_]+
-     * @param string $organizationName
-     * @param string $email
-     * @param string $firstname
-     * @param string $lastname
+     * @param \ArrayAccess $configuration An array of following required parameters:
+     *  [
+     *      "api_base_uri" => "https://api.creads-partners.com/v1/"
+     *      "client_id" => "N_XXX"
+     *      "client_secret" => "XXX"
+     *  ]
+     * @param array $parameters An array of following parameters:
+     *  [
+     *      "userRid" User remote ID matching the regular expression: [a-zA-Z0-9\-\_]+
+     *      "email" User email
+     *      "firstname" User firstname
+     *      "lastname" User lastname
+     *      "username" User nickname
+     *      "organizationRid" Organization remote ID matching the regular expression: [a-zA-Z0-9\-\_]+
+     *      "organizationName" Organization name
+     *  ]
+     * @param string|int $protocol
      *
      * @return string
      */
     static public function create(
         \ArrayAccess $configuration,
         array $parameters,
-        $protocol = self::RFC1_SIGNATURE_PROTOCOL
+        $protocol = self::RFC2_SIGNATURE_PROTOCOL
     ) {
+        $signedUrl = null;
 
         if (!isset($configuration['api_base_uri'])) {
             throw new \InvalidArgumentException('Missing "base_uri" parameter in configuration');
@@ -42,10 +49,21 @@ class SignedAuthenticationUrlFactory
             throw new \InvalidArgumentException('Missing "client_secret" parameter in configuration');
         }
 
-        if (self::RFC0_SIGNATURE_PROTOCOL == $protocol) {
-            $signedUrl = new V0SignedAuthenticationUrl();
-        } else {
-            $signedUrl = new SignedAuthenticationUrl();
+        switch ($protocol) {
+            case self::RFC0_SIGNATURE_PROTOCOL: {
+                if (!array_key_exists('organizationName', $parameters) || !$parameters['organizationName']) {
+                    throw new \InvalidArgumentException('Missing "organizationName" parameter in configuration');
+                }
+                $signedUrl = new V0SignedAuthenticationUrl();
+                break;
+            }
+            case self::RFC2_SIGNATURE_PROTOCOL: {
+                if (!array_key_exists('userRid', $parameters) || !$parameters['userRid']) {
+                    throw new \InvalidArgumentException('Missing "userRid" parameter in configuration');
+                }
+                $signedUrl = new SignedAuthenticationUrl();
+                break;
+            }
         }
 
         return $signedUrl->getSignedUri(
@@ -60,7 +78,7 @@ class SignedAuthenticationUrlFactory
     {
         return [
             self::RFC0_SIGNATURE_PROTOCOL,
-            self::RFC1_SIGNATURE_PROTOCOL
+            self::RFC2_SIGNATURE_PROTOCOL
         ];
     }
 }

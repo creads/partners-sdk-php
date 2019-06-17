@@ -19,26 +19,45 @@ class SignedAuthUrlCommand extends Command
             ->setName('signed-auth-url')
             ->setDescription('Generate a signed auth URL')
             ->addArgument(
-                'organizationName',
-                InputArgument::REQUIRED
-            )->addArgument(
                 'email',
-                InputArgument::REQUIRED
-            )->addArgument(
-                'organizationRid',
-                InputArgument::OPTIONAL
-            )->addArgument(
+                InputArgument::REQUIRED,
+                'Set user email (Required)'
+            )->addOption(
+                'organizationName',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set organization name (Required by RFC0)'
+            )->addOption(
                 'firstname',
-                InputArgument::OPTIONAL
-            )->addArgument(
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set organization remote ID'
+            )->addOption(
                 'lastname',
-                InputArgument::OPTIONAL
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set user lastname'
+            )->addOption(
+                'organizationRid',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set organization Remote ID'
+            )->addOption(
+                'userRid',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set user remote ID (Required by RFC2)'
+            )->addOption(
+                'username',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set user nickname'
             )->addOption(
                 'protocol',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Set protocol to another version than default',
-                SignedAuthenticationUrlFactory::RFC1_SIGNATURE_PROTOCOL
+                'Set protocol to another version than default (values: 0 for RFC0 or 2 for RFC2)',
+                SignedAuthenticationUrlFactory::RFC2_SIGNATURE_PROTOCOL
             )->addOption(
                 'api-base-uri',
                 null,
@@ -68,7 +87,6 @@ class SignedAuthUrlCommand extends Command
         }
 
         $configuration = $this->getHelperSet()->get('configuration');
-
         $protocol = $input->getOption('protocol');
         $apiBaseUri = $input->getOption('api-base-uri');
         $clientId = $input->getOption('client-id');
@@ -92,11 +110,13 @@ class SignedAuthUrlCommand extends Command
         $signedUrl = SignedAuthenticationUrlFactory::create(
             $configuration,
             [
-                'organizationRid' => $input->getArgument('organizationRid'),
-                'organizationName' => $input->getArgument('organizationName'),
+                'userRid' => $input->getOption('userRid'),
                 'email' => $input->getArgument('email'),
-                'firstname' => $input->getArgument('firstname'),
-                'lastname' => $input->getArgument('lastname'),
+                'firstname' => $input->getOption('firstname'),
+                'lastname' => $input->getOption('lastname'),
+                'username' => $input->getOption('username'),
+                'organizationRid' => $input->getOption('organizationRid'),
+                'organizationName' => $input->getOption('organizationName'),
             ],
             $protocol
         );

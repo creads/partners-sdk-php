@@ -3,7 +3,7 @@
 namespace Creads\Partners;
 
 /**
- * A signed authentication URL following RFC1 specs.
+ * A signed authentication URL following RFC2 specs.
  */
 class SignedAuthenticationUrl
 {
@@ -13,18 +13,29 @@ class SignedAuthenticationUrl
         $now->setTimezone(new \DateTimeZone('UTC'));
         $expires = $now->modify('+5 minutes');
         $iso8601Expires = $expires->format('Ymd\THis\Z');
-
         $encodedUri = $baseUri . $this->encodePath($parameters);
-
         $signature = $this->getSignature($secretKey, $iso8601Expires, $encodedUri, $parameters);
-
-        $query = http_build_query([
-            'expires' => $iso8601Expires,
-            'signature' => $signature,
-            'accessKeyId' => $accessKey
-        ]);
+        $query = $this->buildQuery($iso8601Expires, $signature, $accessKey, $parameters);
 
         return $encodedUri . '?' . $query;
+    }
+
+    protected function buildQuery(
+        string $iso8601Expires,
+        string $signature,
+        string $accessKey,
+        array $parameters
+    ) {
+        return http_build_query([
+            'expires' => $iso8601Expires,
+            'signature' => $signature,
+            'accessKeyId' => $accessKey,
+            'firstname' => $parameters['firstname'] ? base64_encode($parameters['firstname']) : null,
+            'lastname' => $parameters['lastname'] ? base64_encode($parameters['lastname']) : null,
+            'username' => $parameters['username'] ? base64_encode($parameters['username']) : null,
+            'organizationRid' => $parameters['organizationRid'],
+            'organizationName' => $parameters['organizationName'] ? base64_encode($parameters['organizationName']) : null,
+        ]);
     }
 
     protected function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])
@@ -39,26 +50,20 @@ class SignedAuthenticationUrl
     {
         $parsed = parse_url($signedUri);
 
-        if (!isset($parsed['query'])) {
-            return false;
-        }
-        if (!isset($parsed['path'])) {
+        if (!isset($parsed['query']) || !isset($parsed['path'])) {
             return false;
         }
 
         $query = $parsed['query'];
-
-
         parse_str($query, $parsedQuery);
-
         $iso8601Expires = $parsedQuery['expires'];
         $signature = $parsedQuery['signature'];
-
         $encodedUri = strtok($signedUri, '?');
-
         $path = $parsed['path'];
-        //$parameters will be empty, unless decodePath is overriden to allow multi-pass
-        //encryption based on parameters (and validation)
+        /*
+         * $parameters will be empty, unless decodePath is overriden to allow multi-pass
+         * encryption based on parameters (and validation).
+         */
         $parameters = $this->decodePath($path);
         $controlSignature = $this->getSignature($secretKey, $iso8601Expires, $encodedUri, $parameters);
 
@@ -67,12 +72,9 @@ class SignedAuthenticationUrl
 
     protected function encodePath(array $parameters)
     {
-        $path = 'signed-auth/{organizationRid}/{organizationName}/{email}/{firstname}/{lastname}';
-
-        $parameters['organizationName'] = base64_encode($parameters['organizationName']);
+        $path = 'signed-auth/rfc2/{userRid}/{email}';
+        $parameters['userRid'] = $parameters['userRid'];
         $parameters['email'] = base64_encode($parameters['email']);
-        $parameters['firstname'] = base64_encode($parameters['firstname']);
-        $parameters['lastname'] = base64_encode($parameters['lastname']);
 
         foreach ($parameters as $parameter => $value) {
             $path = preg_replace('/\{' . preg_quote($parameter) . '\}/', $value, $path);
@@ -83,7 +85,7 @@ class SignedAuthenticationUrl
 
     protected function decodePath($path)
     {
-        //not used
+        // Not used.
         return [];
     }
 }
