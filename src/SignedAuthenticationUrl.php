@@ -7,11 +7,11 @@ namespace Creads\Partners;
  */
 class SignedAuthenticationUrl
 {
-    public function getSignedUri($baseUri, $accessKey, $secretKey, array $parameters)
+    public function getSignedUri($baseUri, $accessKey, $secretKey, array $parameters, $expirationTime = '+5 minutes')
     {
         $now = new \DateTime();
         $now->setTimezone(new \DateTimeZone('UTC'));
-        $expires = $now->modify('+5 minutes');
+        $expires = $now->modify($expirationTime);
         $iso8601Expires = $expires->format('Ymd\THis\Z');
         $encodedUri = $baseUri . $this->encodePath($parameters);
         $signature = $this->getSignature($secretKey, $iso8601Expires, $encodedUri, $parameters);

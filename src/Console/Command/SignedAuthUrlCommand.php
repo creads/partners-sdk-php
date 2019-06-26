@@ -73,6 +73,12 @@ class SignedAuthUrlCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Set client secret than default'
+            )->addOption(
+                'expiration-time',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Set link expiration time. The accepted format are same of strtotime() PHP function.',
+                '+5 minutes'
             )
         ;
     }
@@ -118,7 +124,8 @@ class SignedAuthUrlCommand extends Command
                 'organizationRid' => $input->getOption('organizationRid'),
                 'organizationName' => $input->getOption('organizationName'),
             ],
-            $protocol
+            $protocol,
+            $input->getOption('expiration-time')
         );
 
         $output->writeln(sprintf('<comment>%s</comment>', $signedUrl));

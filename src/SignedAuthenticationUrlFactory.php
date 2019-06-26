@@ -27,13 +27,15 @@ class SignedAuthenticationUrlFactory
      *      "organizationName" Organization name
      *  ]
      * @param string|int $protocol
+     * @param string $expirationTime
      *
      * @return string
      */
     static public function create(
         \ArrayAccess $configuration,
         array $parameters,
-        $protocol = self::RFC2_SIGNATURE_PROTOCOL
+        $protocol = self::RFC2_SIGNATURE_PROTOCOL,
+        string $expirationTime = '+5 minutes'
     ) {
         $signedUrl = null;
 
@@ -70,7 +72,8 @@ class SignedAuthenticationUrlFactory
             $configuration['api_base_uri'],
             $configuration['client_id'],
             $configuration['client_secret'],
-            $parameters
+            $parameters,
+            $expirationTime
         );
     }
 
