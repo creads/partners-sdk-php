@@ -49,8 +49,8 @@ class ConfigurationHelper extends Helper implements \ArrayAccess
     protected function getDefaultParameters()
     {
         return [
-            'connect_base_uri' => 'https://connect-preprod.creads-partners.com/',
-            'api_base_uri'     => 'https://api-preprod.creads-partners.com/v1/',
+            'connect_base_uri' => 'https://api.creads.tech/',
+            'api_base_uri'     => 'https://api.creads.tech/v1/',
         ];
     }
 
