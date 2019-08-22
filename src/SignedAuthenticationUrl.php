@@ -26,16 +26,20 @@ class SignedAuthenticationUrl
         string $accessKey,
         array $parameters
     ) {
-        return http_build_query([
-            'expires' => $iso8601Expires,
-            'signature' => $signature,
-            'accessKeyId' => $accessKey,
-            'firstname' => $parameters['firstname'] ? base64_encode($parameters['firstname']) : null,
-            'lastname' => $parameters['lastname'] ? base64_encode($parameters['lastname']) : null,
-            'username' => $parameters['username'] ? base64_encode($parameters['username']) : null,
-            'organizationRid' => $parameters['organizationRid'],
-            'organizationName' => $parameters['organizationName'] ? base64_encode($parameters['organizationName']) : null,
-        ]);
+        array_walk($parameters, function (&$value, $key) {
+            if (in_array($key, ['firstname', 'lastname', 'username', 'organizationName'])) {
+                $value = base64_encode($value);
+            }
+        });
+
+        return http_build_query(array_merge(
+            [
+                'expires' => $iso8601Expires,
+                'signature' => $signature,
+                'accessKeyId' => $accessKey,
+            ],
+            $parameters
+        ));
     }
 
     protected function getSignature($secretKey, $iso8601Expires, $encodedUri, array $parameters = [])

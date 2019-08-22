@@ -31,7 +31,7 @@ class SignedAuthenticationUrlFactory
      *
      * @return string
      */
-    static public function create(
+    public static function create(
         \ArrayAccess $configuration,
         array $parameters,
         $protocol = self::RFC2_SIGNATURE_PROTOCOL,
@@ -52,20 +52,19 @@ class SignedAuthenticationUrlFactory
         }
 
         switch ($protocol) {
-            case self::RFC0_SIGNATURE_PROTOCOL: {
+            case self::RFC0_SIGNATURE_PROTOCOL:
                 if (!array_key_exists('organizationName', $parameters) || !$parameters['organizationName']) {
                     throw new \InvalidArgumentException('Missing "organizationName" parameter in configuration');
                 }
                 $signedUrl = new V0SignedAuthenticationUrl();
                 break;
-            }
-            case self::RFC2_SIGNATURE_PROTOCOL: {
+
+            case self::RFC2_SIGNATURE_PROTOCOL:
                 if (!array_key_exists('userRid', $parameters) || !$parameters['userRid']) {
                     throw new \InvalidArgumentException('Missing "userRid" parameter in configuration');
                 }
                 $signedUrl = new SignedAuthenticationUrl();
                 break;
-            }
         }
 
         return $signedUrl->getSignedUri(
@@ -77,11 +76,16 @@ class SignedAuthenticationUrlFactory
         );
     }
 
-    static public function getAvailableProtocols()
+    public static function getAvailableProtocols()
     {
         return [
             self::RFC0_SIGNATURE_PROTOCOL,
             self::RFC2_SIGNATURE_PROTOCOL
         ];
+    }
+
+    public static function getLogoutUrl(array $configuration, array $parameters = [])
+    {
+        return $configuration['api_base_uri'].'signed-auth/logout?'.http_build_query($parameters);
     }
 }
