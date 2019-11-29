@@ -14,7 +14,7 @@ class OAuthAccessToken implements AuthenticationInterface
     public function __construct($clientId, $clientSecret, $params = [])
     {
         if (isset($params['base_uri'])) {
-            $this->baseUri = $params['base_uri'];
+            $this->baseUri = rtrim($params['base_uri'], '/').'/';
         }
 
         $this->clientId = $clientId;
@@ -44,7 +44,7 @@ class OAuthAccessToken implements AuthenticationInterface
     {
         return [
             'tokens_dir' => sys_get_temp_dir(),
-       ];
+        ];
     }
 
     public function getAccessToken($scope = 'base', $noStoring = false)

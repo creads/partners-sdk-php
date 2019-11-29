@@ -31,6 +31,9 @@ class Client extends GuzzleClient
         if (!empty($config['format']) && in_array($config['format'], ['json'])) {
             $this->format = $config['format'];
         }
+        if (isset($config['base_uri'])) {
+            $config['base_uri'] = rtrim($config['base_uri'], '/').'/';
+        }
         parent::__construct($config);
     }
 
