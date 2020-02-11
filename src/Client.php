@@ -115,6 +115,7 @@ class Client extends GuzzleClient
 
     public function postFile($sourceFilepath, $destinationFilepath = null, $enforceUnicity = false)
     {
+        $mimeType = mime_content_type($sourceFilepath);
         if (!$destinationFilepath) {
             // No specified filename, use the uploaded one
             $destinationFilepath = pathinfo($sourceFilepath)['basename'];
@@ -136,6 +137,11 @@ class Client extends GuzzleClient
                 'contents' => $value,
             ];
         }
+
+        $multipartBody[] = [
+            'name' => 'Content-Type',
+            'contents' => $mimeType,
+        ];
 
         // Build the multipart file upload (order matters)
         $multipartBody[] = [
