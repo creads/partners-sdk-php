@@ -20,14 +20,10 @@ final class WebhookTest extends TestCase
         $this->assertTrue($webhook->isSignatureValid($signature, '{}'));
     }
 
-    /**
-     * @expectedException        \InvalidArgumentException
-     * @expectedExceptionMessage Incorrect bodyString given, please provide a json string of the webhook body.
-     */
     public function testThrowsIfBodyIsNotAString()
     {
-        $webhook = new Webhook('my_secret');
-
-        $webhook->isSignatureValid('signature', []);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Incorrect bodyString given, please provide a json string of the webhook body.');
+        (new Webhook('my_secret'))->isSignatureValid('signature', []);
     }
 }
